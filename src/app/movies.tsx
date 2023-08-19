@@ -1,23 +1,21 @@
 "use client";
-import { ComponentPropsWithoutRef, FC, useState } from "react";
+import type { ComponentPropsWithoutRef, FC } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
-import axios, { AxiosResponse } from "axios";
+import type { AxiosResponse } from "axios";
+import axios from "axios";
 import { AcademicCapIcon, CalendarIcon, TvIcon } from "@heroicons/react/24/outline";
 import { cn } from "@/lib/utils";
-import {
-  AUDIENCE_SCORE_OPTIONS,
+import type {
   AffiliateOption,
-  AffiliateOptions,
   AudienceScoreOption,
-  CRITICS_SCORE_OPTIONS,
   CriticsScoreOption,
   FilterOptions,
-  GENRE_OPTIONS,
   GenreOption,
-  SORT_OPTIONS,
   SortOption,
 } from "@/types/rotten-tomatoes";
+import { AUDIENCE_SCORE_OPTIONS, AffiliateOptions, CRITICS_SCORE_OPTIONS, GENRE_OPTIONS, SORT_OPTIONS } from "@/types/rotten-tomatoes";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -30,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import toPairs from "lodash/toPairs";
+import type { MovieQuery } from "@/types/movies";
 
 export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
   const [genreFilter, setGenreFilter] = useState<GenreOption[]>([]);
@@ -98,6 +97,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
               <DropdownMenuCheckboxItem
                 checked={genreFilter.includes(key as GenreOption)}
                 onCheckedChange={() => handleGenreFiltersCheckedChange(key as GenreOption)}
+                key={key}
               >
                 {value}
               </DropdownMenuCheckboxItem>
@@ -115,6 +115,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
               <DropdownMenuCheckboxItem
                 checked={criticsFilter.includes(key as CriticsScoreOption)}
                 onCheckedChange={() => handleCriticsFiltersCheckedChange(key as CriticsScoreOption)}
+                key={key}
               >
                 {value}
               </DropdownMenuCheckboxItem>
@@ -132,6 +133,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
               <DropdownMenuCheckboxItem
                 checked={audienceFilter.includes(key as AudienceScoreOption)}
                 onCheckedChange={() => handleAudienceFiltersCheckedChange(key as AudienceScoreOption)}
+                key={key}
               >
                 {value}
               </DropdownMenuCheckboxItem>
@@ -149,6 +151,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
               <DropdownMenuCheckboxItem
                 checked={affiliateFilter.includes(key as AffiliateOption)}
                 onCheckedChange={() => handleAffiliateFiltersCheckedChange(key as AffiliateOption)}
+                key={key}
               >
                 {value}
               </DropdownMenuCheckboxItem>
@@ -162,10 +165,11 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
           <DropdownMenuContent className="w-56">
             <DropdownMenuLabel>Select the desired sorting</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {/* @ts-ignore */}
-            <DropdownMenuRadioGroup value={sorting} onValueChange={setSorting}>
+            <DropdownMenuRadioGroup value={sorting} onValueChange={(value) => setSorting(value as SortOption)}>
               {toPairs(SORT_OPTIONS).map(([key, value]) => (
-                <DropdownMenuRadioItem value={key}>{value}</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value={key} key={key}>
+                  {value}
+                </DropdownMenuRadioItem>
               ))}
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
@@ -173,7 +177,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
       </div>
       <div className="flex gap-x-6 gap-y-8 flex-wrap">
         {movieData?.grid.list.map((movie) => (
-          <div className="bg-background flex flex-col gap-2 min-h-full ">
+          <div className="bg-background flex flex-col gap-2 min-h-full" key={movie.publicId}>
             <a
               target="_blank"
               rel="norefferer"

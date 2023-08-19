@@ -1,13 +1,13 @@
-type MovieQuery = {
+export type MovieQuery = {
   title: string;
   grid: {
     id: string;
     list: Movie[];
   };
-  pageInfo: { startCursor: string; endCursor: string; hasNextPage: Boolean; hasPreviousPage: Boolean };
+  pageInfo: { startCursor: string; endCursor: string; hasNextPage: boolean; hasPreviousPage: boolean };
 };
 
-type Movie = {
+export type Movie = {
   audienceScore: {
     score: string;
     sentiment: string;
