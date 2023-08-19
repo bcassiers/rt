@@ -3,15 +3,28 @@ import { ComponentPropsWithoutRef, FC, useState } from "react";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosResponse } from "axios";
-import Link from "next/link";
 import { AcademicCapIcon, CalendarIcon, TvIcon } from "@heroicons/react/24/outline";
 import { cn } from "@/lib/utils";
-import { FilterOptions, GENRE_OPTIONS, GenreOption } from "@/types/rotten-tomatoes";
+import {
+  AUDIENCE_SCORE_OPTIONS,
+  AffiliateOption,
+  AffiliateOptions,
+  AudienceScoreOption,
+  CRITICS_SCORE_OPTIONS,
+  CriticsScoreOption,
+  FilterOptions,
+  GENRE_OPTIONS,
+  GenreOption,
+  SORT_OPTIONS,
+  SortOption,
+} from "@/types/rotten-tomatoes";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -20,11 +33,20 @@ import toPairs from "lodash/toPairs";
 
 export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
   const [genreFilter, setGenreFilter] = useState<GenreOption[]>([]);
-  const movieQuery = useQuery<FilterOptions, Error, AxiosResponse<MovieQuery>>(
-    ["Movies", genreFilter],
+  const [criticsFilter, setCriticsFilter] = useState<CriticsScoreOption[]>([]);
+  const [affiliateFilter, setAffiliateFilter] = useState<AffiliateOption[]>([]);
+  const [sorting, setSorting] = useState<SortOption | undefined>();
+  const [audienceFilter, setAudienceFilter] = useState<AudienceScoreOption[]>([]);
+
+  const movieQuery = useQuery(
+    ["Movies", genreFilter, criticsFilter, sorting, affiliateFilter, audienceFilter],
     () =>
-      axios.post("/api/movies", {
+      axios.post<FilterOptions, AxiosResponse<MovieQuery>>("/api/movies", {
         genre: genreFilter,
+        criticsScore: criticsFilter,
+        audienceScore: audienceFilter,
+        affiliate: affiliateFilter,
+        sort: sorting,
       }),
     { onSuccess: (data) => console.log(data) }
   );
@@ -36,13 +58,38 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
       setGenreFilter([...genreFilter, genre]);
     }
   };
+
+  const handleCriticsFiltersCheckedChange = (critics: CriticsScoreOption) => {
+    if (criticsFilter.includes(critics)) {
+      setCriticsFilter(criticsFilter.filter((c) => c !== critics));
+    } else {
+      setCriticsFilter([...criticsFilter, critics]);
+    }
+  };
+
+  const handleAudienceFiltersCheckedChange = (audience: AudienceScoreOption) => {
+    if (audienceFilter.includes(audience)) {
+      setAudienceFilter(audienceFilter.filter((a) => a !== audience));
+    } else {
+      setAudienceFilter([...audienceFilter, audience]);
+    }
+  };
+
+  const handleAffiliateFiltersCheckedChange = (affiliate: AffiliateOption) => {
+    if (affiliateFilter.includes(affiliate)) {
+      setAffiliateFilter(affiliateFilter.filter((a) => a !== affiliate));
+    } else {
+      setAffiliateFilter([...affiliateFilter, affiliate]);
+    }
+  };
+
   const movieData = movieQuery.data?.data;
   return (
     <div className="flex flex-col gap-3">
       <div className="flex gap-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">Genres</Button>
+            <Button variant={genreFilter.length ? "default" : "outline"}>Genres</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56">
             <DropdownMenuLabel>Select the desired genres</DropdownMenuLabel>
@@ -55,6 +102,72 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
                 {value}
               </DropdownMenuCheckboxItem>
             ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant={criticsFilter.length ? "default" : "outline"}>Critics rating</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56">
+            <DropdownMenuLabel>Select the desired rating</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {toPairs(CRITICS_SCORE_OPTIONS).map(([key, value]) => (
+              <DropdownMenuCheckboxItem
+                checked={criticsFilter.includes(key as CriticsScoreOption)}
+                onCheckedChange={() => handleCriticsFiltersCheckedChange(key as CriticsScoreOption)}
+              >
+                {value}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant={audienceFilter.length ? "default" : "outline"}>Audience rating</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56">
+            <DropdownMenuLabel>Select the desired rating</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {toPairs(AUDIENCE_SCORE_OPTIONS).map(([key, value]) => (
+              <DropdownMenuCheckboxItem
+                checked={audienceFilter.includes(key as AudienceScoreOption)}
+                onCheckedChange={() => handleAudienceFiltersCheckedChange(key as AudienceScoreOption)}
+              >
+                {value}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant={affiliateFilter.length ? "default" : "outline"}>Platforms</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56">
+            <DropdownMenuLabel>Select the desired platforms</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {toPairs(AffiliateOptions).map(([key, value]) => (
+              <DropdownMenuCheckboxItem
+                checked={affiliateFilter.includes(key as AffiliateOption)}
+                onCheckedChange={() => handleAffiliateFiltersCheckedChange(key as AffiliateOption)}
+              >
+                {value}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant={sorting ? "default" : "outline"}>Sorting</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56">
+            <DropdownMenuLabel>Select the desired sorting</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {/* @ts-ignore */}
+            <DropdownMenuRadioGroup value={sorting} onValueChange={setSorting}>
+              {toPairs(SORT_OPTIONS).map(([key, value]) => (
+                <DropdownMenuRadioItem value={key}>{value}</DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 export const SORT_OPTIONS = {
   popular: "Popularity",
   newest: "Release date",
