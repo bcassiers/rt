@@ -36,8 +36,6 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -136,6 +134,39 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const mediaList = data?.pages.reduce((acc, page) => [...acc, ...page.data.grid.list], [] as MovieQuery["grid"]["list"]);
+
+  const Filter = <T extends keyof FilterOptions>({
+    name,
+    type,
+    filterOptions,
+  }: {
+    name: string;
+    type: T;
+    filterOptions: Record<FilterValueType<T>, string>;
+  }) => {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className={cn("capitalize", { "border-blue-300": !!filters[type].length })}>
+            {name}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56">
+          <DropdownMenuLabel>Select the desired {name}s</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {toPairs<string>(filterOptions).map(([key, value]) => (
+            <DropdownMenuCheckboxItem
+              checked={filters[type].includes(key as never)}
+              onCheckedChange={() => handleFilterChange(type, key as FilterValueType<T>)}
+              key={key}
+            >
+              {value}
+            </DropdownMenuCheckboxItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
   return (
     <Tabs className="flex flex-col px-3 md:px-10" value={type} onValueChange={(value) => setType(value as ResourceType)}>
       <div className="flex flex-col gap-3 sticky top-0 py-2 md:py-4 bg-background border-b border-foreground z-10">
@@ -158,104 +189,11 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
           </TabsTrigger>
         </TabsList>
         <div className="flex gap-3 flex-wrap">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className={cn({ "border-blue-300": !!filters.genre.length })}>
-                Genres
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuLabel>Select the desired genres</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {toPairs(GENRE_OPTIONS).map(([key, value]) => (
-                <DropdownMenuCheckboxItem
-                  checked={filters.genre.includes(key as GenreOption)}
-                  onCheckedChange={() => handleFilterChange("genre", key as GenreOption)}
-                  key={key}
-                >
-                  {value}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className={cn({ "border-yellow-300": !!filters.criticsScore.length })}>
-                Critics rating
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuLabel>Select the desired rating</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {toPairs(CRITICS_SCORE_OPTIONS).map(([key, value]) => (
-                <DropdownMenuCheckboxItem
-                  checked={filters.criticsScore.includes(key as CriticsScoreOption)}
-                  onCheckedChange={() => handleFilterChange("criticsScore", key as CriticsScoreOption)}
-                  key={key}
-                >
-                  {value}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className={cn({ "border-orange-300": !!filters.audienceScore.length })}>
-                Audience rating
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuLabel>Select the desired rating</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {toPairs(AUDIENCE_SCORE_OPTIONS).map(([key, value]) => (
-                <DropdownMenuCheckboxItem
-                  checked={filters.audienceScore.includes(key as AudienceScoreOption)}
-                  onCheckedChange={() => handleFilterChange("audienceScore", key as AudienceScoreOption)}
-                  key={key}
-                >
-                  {value}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className={cn({ "border-purple-300": filters.affiliate.length })}>
-                Platforms
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuLabel>Select the desired platforms</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {toPairs(AFFILIATE_OPTIONS).map(([key, value]) => (
-                <DropdownMenuCheckboxItem
-                  checked={filters.affiliate.includes(key as AffiliateOption)}
-                  onCheckedChange={() => handleFilterChange("affiliate", key as AffiliateOption)}
-                  key={key}
-                >
-                  {value}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className={cn({ "border-cyan-300": filters.sort.length })}>
-                sort
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuLabel>Select the desired sort</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup value={filters.sort[0]} onValueChange={(value) => handleFilterChange("sort", value as SortOption)}>
-                {toPairs(SORT_OPTIONS).map(([key, value]) => (
-                  <DropdownMenuRadioItem value={key} key={key}>
-                    {value}
-                  </DropdownMenuRadioItem>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Filter name="genre" type="genre" filterOptions={GENRE_OPTIONS} />
+          <Filter name="critics rating" type="criticsScore" filterOptions={CRITICS_SCORE_OPTIONS} />
+          <Filter name="audience rating" type="audienceScore" filterOptions={AUDIENCE_SCORE_OPTIONS} />
+          <Filter name="plaform" type="affiliate" filterOptions={AFFILIATE_OPTIONS} />
+          <Filter name="sort" type="sort" filterOptions={SORT_OPTIONS} />
           <div className="ml-auto flex gap-3 w-[500px] items-center">
             Preference :<p>Critics</p>
             <Slider
@@ -548,4 +486,3 @@ const MediaCardSkeleton: FC<ComponentPropsWithoutRef<"div">> = ({ ...props }) =>
     </div>
   );
 };
-MediaCard.displayName = "MovieCard";
