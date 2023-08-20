@@ -1,3 +1,5 @@
+import type { FilterOptions } from "./rotten-tomatoes";
+
 export type MovieQuery = {
   title: string;
   grid: {
@@ -5,6 +7,12 @@ export type MovieQuery = {
     list: Movie[];
   };
   pageInfo: { startCursor: string; endCursor: string; hasNextPage: boolean; hasPreviousPage: boolean };
+  nextPage?: number;
+};
+
+export type MoviesQueryParameters = {
+  filters: FilterOptions;
+  page?: number;
 };
 
 export type Movie = {
