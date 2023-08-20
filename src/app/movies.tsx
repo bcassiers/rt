@@ -9,10 +9,13 @@ import {
   AcademicCapIcon,
   ArrowsUpDownIcon,
   Bars3BottomLeftIcon,
+  BeakerIcon,
   CalendarIcon,
-  ChevronDoubleRightIcon,
+  ChatBubbleOvalLeftEllipsisIcon,
   ComputerDesktopIcon,
+  FilmIcon,
   InformationCircleIcon,
+  StarIcon,
   TvIcon,
   VideoCameraIcon,
   XCircleIcon,
@@ -138,7 +141,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
             <p className="hidden sm:block">TV Shows</p>
           </TabsTrigger>
           <TabsTrigger value="movies_coming_soon" className="flex gap-2">
-            <ChevronDoubleRightIcon className="h-4 md:h-5" />
+            <FilmIcon className="h-4 md:h-5" />
             <p className="hidden sm:block">Coming soon</p>
           </TabsTrigger>
         </TabsList>
@@ -319,33 +322,39 @@ const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard(
   const audienceScore = Number(media.audienceScore.score);
   const criticsScore = Number(media.criticsScore.score);
   const averageScore = (audienceScore * criticsVsAudiencePreference[0] + criticsScore * (100 - criticsVsAudiencePreference[0])) / 100;
-  const [open, setIsOpen] = useState(false);
 
-  const additionalInfoQuery = useQuery(
-    ["Movie", media.mediaUrl],
-    () =>
-      axios.post<Error, AxiosResponse<{ synopsis: string; audienceConsensus: string; criticsConsensus: string }>, { mediaUrl: string }>(
-        `/api/movies/additionnal-info`,
-        {
-          mediaUrl: media.mediaUrl,
-        }
-      ),
-    {
-      enabled: open,
-    }
+  const additionalInfoQuery = useQuery(["Movie", media.mediaUrl], () =>
+    axios.post<
+      Error,
+      AxiosResponse<{
+        synopsis: string;
+        audienceConsensus: string;
+        criticsConsensus: string;
+        director: string;
+        writer: string;
+        genres: string;
+        starring: string;
+      }>,
+      { mediaUrl: string }
+    >(`/api/movies/additionnal-info`, {
+      mediaUrl: media.mediaUrl,
+    })
   );
 
   const synopsis = additionalInfoQuery.data?.data.synopsis;
   const criticsConsensus = additionalInfoQuery.data?.data.criticsConsensus;
   const audienceConsensus = additionalInfoQuery.data?.data.audienceConsensus;
-
+  const director = additionalInfoQuery.data?.data.director;
+  const writer = additionalInfoQuery.data?.data.writer;
+  const genres = additionalInfoQuery.data?.data.genres;
+  const starring = additionalInfoQuery.data?.data.starring;
   const CardContent = () => (
     <>
       <a
         target="_blank"
         rel="norefferer"
         href={`https://www.rottentomatoes.com${media.mediaUrl}`}
-        className="overflow-hidden relative rounded-t-xl w-full aspect-[2/3]"
+        className="overflow-hidden relative rounded-t-xl w-full aspect-[4/5]"
       >
         <Image src={media.posterUri} alt={media.title} fill className="object-cover transition-all hover:scale-105" />
       </a>
@@ -355,10 +364,35 @@ const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard(
             {`${media.criticsScore.certifiedAttribute ? "⭐️ " : ""}${media.title}`}
           </h2>
           <span className="flex gap-1 items-center text-xs text-muted-foreground">
-            <CalendarIcon className="h-4 w-4" />
+            <CalendarIcon className="min-h-[1rem] min-w-[1rem] w-4 h-4" />
             {media.releaseDateText}
           </span>
-          <HoverCard onOpenChange={setIsOpen} openDelay={150} closeDelay={3000}>
+          {director && (
+            <span className="flex gap-1 items-center text-xs text-muted-foreground">
+              <VideoCameraIcon className="min-h-[1rem] min-w-[1rem] w-4 h-4" />
+              {director}
+            </span>
+          )}
+          {writer && (
+            <span className="flex gap-1 items-center text-xs text-muted-foreground">
+              <ChatBubbleOvalLeftEllipsisIcon className="min-h-[1rem] min-w-[1rem] w-4 h-4" />
+              {writer}
+            </span>
+          )}
+          {genres && (
+            <span className="flex gap-1 items-center text-xs text-muted-foreground">
+              <BeakerIcon className="min-h-[1rem] min-w-[1rem] w-4 h-4" />
+              {genres}
+            </span>
+          )}
+          {starring && (
+            <span className="flex gap-1 items-center text-xs text-muted-foreground">
+              <StarIcon className="min-h-[1rem] min-w-[1rem] w-4 h-4" />
+              {starring}
+            </span>
+          )}
+
+          <HoverCard openDelay={150} closeDelay={3000}>
             <HoverCardTrigger asChild>
               <span className="flex gap-1 items-center text-xs text-muted-foreground underline cursor-help">
                 <InformationCircleIcon className="h-4 w-4" />

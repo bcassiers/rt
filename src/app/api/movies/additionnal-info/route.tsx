@@ -15,5 +15,30 @@ export const POST = async (request: Request) => {
   const synopsis = $('[data-qa="movie-info-synopsis"]').text().trim();
   const criticsConsensus = $('[data-qa="critics-consensus"]').text().trim();
   const audienceConsensus = $('[data-qa="audience-consensus"]').text().trim();
-  return NextResponse.json({ synopsis, criticsConsensus, audienceConsensus });
+  const movieInfo: Record<string, string> = {};
+  $(".info-item").each((index, element) => {
+    const label = $(element).find("b").first().text().trim().slice(0, -1); // Removing the trailing colon
+    let value = $(element).find("span").first().text().trim();
+
+    // If the value contains links, extract the text from each link
+    if ($(element).find("span a").length) {
+      value = $(element)
+        .find("span a")
+        .map((i, el) => $(el).text().trim())
+        .get()
+        .join(", ");
+    }
+    movieInfo[label.toLowerCase()] = value.replace(/\s+/g, " ").trim();
+  });
+  console.log(movieInfo);
+  console.log(movieInfo.genre);
+  return NextResponse.json({
+    synopsis,
+    criticsConsensus,
+    audienceConsensus,
+    director: movieInfo.director ?? movieInfo.creators,
+    writer: movieInfo.writer,
+    genres: movieInfo.genre,
+    starring: movieInfo.starring,
+  });
 };
