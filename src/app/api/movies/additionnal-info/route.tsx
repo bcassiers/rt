@@ -5,7 +5,6 @@ import { NextResponse } from "next/server";
 
 export const POST = async (request: Request) => {
   const { mediaUrl }: { mediaUrl: string } = await request.json();
-  console.log({ mediaUrl });
 
   const response = await axios.get(`https://www.rottentomatoes.com${mediaUrl}`);
 
