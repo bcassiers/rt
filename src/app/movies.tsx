@@ -12,10 +12,11 @@ import {
   CalendarIcon,
   InformationCircleIcon,
   TvIcon,
+  XCircleIcon,
 } from "@heroicons/react/24/outline";
 import { cn } from "@/lib/utils";
 import type { AffiliateOption, AudienceScoreOption, CriticsScoreOption, GenreOption, SortOption } from "@/types/rotten-tomatoes";
-import { AUDIENCE_SCORE_OPTIONS, AffiliateOptions, CRITICS_SCORE_OPTIONS, GENRE_OPTIONS, SORT_OPTIONS } from "@/types/rotten-tomatoes";
+import { AUDIENCE_SCORE_OPTIONS, AFFILIATE_OPTIONS, CRITICS_SCORE_OPTIONS, GENRE_OPTIONS, SORT_OPTIONS } from "@/types/rotten-tomatoes";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -32,6 +33,7 @@ import toPairs from "lodash/toPairs";
 import type { Movie, MovieQuery, MoviesQueryParameters } from "@/types/movies";
 import { Slider } from "@/components/ui/slider";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Badge } from "@/components/ui/badge";
 
 export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
   const [genreFilter, setGenreFilter] = useState<GenreOption[]>([]);
@@ -92,6 +94,14 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
     }
   };
 
+  const resetFilters = () => {
+    setGenreFilter([]);
+    setCriticsFilter([]);
+    setAudienceFilter([]);
+    setAffiliateFilter([]);
+    setSorting(undefined);
+  };
+
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
@@ -101,107 +111,166 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
   const movieList = data?.pages.reduce((acc, page) => [...acc, ...page.data.grid.list], [] as MovieQuery["grid"]["list"]);
   return (
     <div className="flex flex-col px-10">
-      <div className="flex gap-3 sticky top-0 py-4 bg-background border-b border-foreground z-10">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={genreFilter.length ? "default" : "outline"}>Genres</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            <DropdownMenuLabel>Select the desired genres</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {toPairs(GENRE_OPTIONS).map(([key, value]) => (
-              <DropdownMenuCheckboxItem
-                checked={genreFilter.includes(key as GenreOption)}
-                onCheckedChange={() => handleGenreFiltersCheckedChange(key as GenreOption)}
-                key={key}
-              >
-                {value}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={criticsFilter.length ? "default" : "outline"}>Critics rating</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            <DropdownMenuLabel>Select the desired rating</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {toPairs(CRITICS_SCORE_OPTIONS).map(([key, value]) => (
-              <DropdownMenuCheckboxItem
-                checked={criticsFilter.includes(key as CriticsScoreOption)}
-                onCheckedChange={() => handleCriticsFiltersCheckedChange(key as CriticsScoreOption)}
-                key={key}
-              >
-                {value}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={audienceFilter.length ? "default" : "outline"}>Audience rating</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            <DropdownMenuLabel>Select the desired rating</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {toPairs(AUDIENCE_SCORE_OPTIONS).map(([key, value]) => (
-              <DropdownMenuCheckboxItem
-                checked={audienceFilter.includes(key as AudienceScoreOption)}
-                onCheckedChange={() => handleAudienceFiltersCheckedChange(key as AudienceScoreOption)}
-                key={key}
-              >
-                {value}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={affiliateFilter.length ? "default" : "outline"}>Platforms</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            <DropdownMenuLabel>Select the desired platforms</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {toPairs(AffiliateOptions).map(([key, value]) => (
-              <DropdownMenuCheckboxItem
-                checked={affiliateFilter.includes(key as AffiliateOption)}
-                onCheckedChange={() => handleAffiliateFiltersCheckedChange(key as AffiliateOption)}
-                key={key}
-              >
-                {value}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant={sorting ? "default" : "outline"}>Sorting</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            <DropdownMenuLabel>Select the desired sorting</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuRadioGroup value={sorting} onValueChange={(value) => setSorting(value as SortOption)}>
-              {toPairs(SORT_OPTIONS).map(([key, value]) => (
-                <DropdownMenuRadioItem value={key} key={key}>
+      <div className="flex flex-col gap-3 sticky top-0 py-4 bg-background border-b border-foreground z-10">
+        <div className="flex gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className={cn({ "border-blue-300": genreFilter.length })}>
+                Genres
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Select the desired genres</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {toPairs(GENRE_OPTIONS).map(([key, value]) => (
+                <DropdownMenuCheckboxItem
+                  checked={genreFilter.includes(key as GenreOption)}
+                  onCheckedChange={() => handleGenreFiltersCheckedChange(key as GenreOption)}
+                  key={key}
+                >
                   {value}
-                </DropdownMenuRadioItem>
+                </DropdownMenuCheckboxItem>
               ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <div className="ml-auto flex gap-3 w-[500px] items-center">
-          <p>Critics Preference</p>
-          <Slider
-            max={100}
-            step={1}
-            value={criticsVsAudiencePreference}
-            onValueChange={setCriticsVsAudiencePreference}
-            className="max-w-54 w-54 flex-grow"
-          />
-          <p>Audience Preference</p>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className={cn({ "border-yellow-300": criticsFilter.length })}>
+                Critics rating
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Select the desired rating</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {toPairs(CRITICS_SCORE_OPTIONS).map(([key, value]) => (
+                <DropdownMenuCheckboxItem
+                  checked={criticsFilter.includes(key as CriticsScoreOption)}
+                  onCheckedChange={() => handleCriticsFiltersCheckedChange(key as CriticsScoreOption)}
+                  key={key}
+                >
+                  {value}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className={cn({ "border-orange-300": audienceFilter.length })}>
+                Audience rating
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Select the desired rating</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {toPairs(AUDIENCE_SCORE_OPTIONS).map(([key, value]) => (
+                <DropdownMenuCheckboxItem
+                  checked={audienceFilter.includes(key as AudienceScoreOption)}
+                  onCheckedChange={() => handleAudienceFiltersCheckedChange(key as AudienceScoreOption)}
+                  key={key}
+                >
+                  {value}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className={cn({ "border-purple-300": affiliateFilter.length })}>
+                Platforms
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Select the desired platforms</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {toPairs(AFFILIATE_OPTIONS).map(([key, value]) => (
+                <DropdownMenuCheckboxItem
+                  checked={affiliateFilter.includes(key as AffiliateOption)}
+                  onCheckedChange={() => handleAffiliateFiltersCheckedChange(key as AffiliateOption)}
+                  key={key}
+                >
+                  {value}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className={cn({ "border-cyan-300": sorting })}>
+                Sorting
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Select the desired sorting</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioGroup value={sorting} onValueChange={(value) => setSorting(value as SortOption)}>
+                {toPairs(SORT_OPTIONS).map(([key, value]) => (
+                  <DropdownMenuRadioItem value={key} key={key}>
+                    {value}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <div className="ml-auto flex gap-3 w-[500px] items-center">
+            <p>Critics Preference</p>
+            <Slider
+              max={100}
+              step={1}
+              value={criticsVsAudiencePreference}
+              onValueChange={setCriticsVsAudiencePreference}
+              className="max-w-54 w-54 flex-grow"
+            />
+            <p>Audience Preference</p>
+          </div>
         </div>
+        {(genreFilter.length || criticsFilter.length || audienceFilter.length || affiliateFilter.length || sorting) && (
+          <div className="text-sm flex gap-3 h-10 items-center">
+            <p className="font-bold">Active filters :</p>
+            {genreFilter.map((genre) => (
+              <Badge key={genre} className="cursor-pointer bg-blue-300" onClick={() => handleGenreFiltersCheckedChange(genre)}>
+                {GENRE_OPTIONS[genre]}
+              </Badge>
+            ))}
+            {criticsFilter.map((criticScoreOption) => (
+              <Badge
+                key={criticScoreOption}
+                className="cursor-pointer bg-yellow-300"
+                onClick={() => handleCriticsFiltersCheckedChange(criticScoreOption)}
+              >
+                {CRITICS_SCORE_OPTIONS[criticScoreOption]}
+              </Badge>
+            ))}
+            {audienceFilter.map((audienceScoreOption) => (
+              <Badge
+                key={audienceScoreOption}
+                className="cursor-pointer bg-orange-300"
+                onClick={() => handleAudienceFiltersCheckedChange(audienceScoreOption)}
+              >
+                {AUDIENCE_SCORE_OPTIONS[audienceScoreOption]}
+              </Badge>
+            ))}
+            {affiliateFilter.map((affiliateOption) => (
+              <Badge
+                key={affiliateOption}
+                className="cursor-pointer bg-purple-300"
+                onClick={() => handleAffiliateFiltersCheckedChange(affiliateOption)}
+              >
+                {AFFILIATE_OPTIONS[affiliateOption]}
+              </Badge>
+            ))}
+            {!!sorting ? (
+              <Badge className="cursor-pointer bg-cyan-300" onClick={() => setSorting(undefined)}>
+                {SORT_OPTIONS[sorting]}
+              </Badge>
+            ) : null}
+            <Button variant="outline" size="sm" className="flex gap-2" onClick={() => resetFilters()}>
+              <XCircleIcon className="h-4 w-4" />
+              Clear all
+            </Button>
+          </div>
+        )}
       </div>
+
       <div className="flex gap-x-6 gap-y-8 py-10 flex-wrap">
         {movieList?.map((movie, index) => (
           <MovieCard

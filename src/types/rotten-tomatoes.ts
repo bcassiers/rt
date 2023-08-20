@@ -78,7 +78,7 @@ export const RatingOptions = {
 
 export type RatingOption = keyof typeof RatingOptions;
 
-export const AffiliateOptions = {
+export const AFFILIATE_OPTIONS = {
   amazon_prime: "Amazon Prime",
   amc_plus: "AMC+",
   apple_tv_plus: "Apple TV+",
@@ -93,7 +93,7 @@ export const AffiliateOptions = {
   vudu: "Vudu",
 };
 
-export type AffiliateOption = keyof typeof AffiliateOptions;
+export type AffiliateOption = keyof typeof AFFILIATE_OPTIONS;
 
 export type FilterOptions = {
   sort?: SortOption;
