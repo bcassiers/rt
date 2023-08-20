@@ -356,7 +356,7 @@ const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard(
         target="_blank"
         rel="norefferer"
         href={`https://www.rottentomatoes.com${media.mediaUrl}`}
-        className="overflow-hidden relative rounded-t-xl w-full aspect-[4/5]"
+        className="overflow-hidden relative rounded-t-xl w-full aspect-[2/3]"
       >
         <Image src={media.posterUri} alt={media.title} fill className="object-cover transition-all hover:scale-105" />
       </a>
@@ -509,7 +509,7 @@ const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard(
 const MediaCardSkeleton: FC<ComponentPropsWithoutRef<"div">> = ({ ...props }) => {
   return (
     <div className="flex flex-col gap-2 min-h-fit bg-cyan-900/50 rounded-xl" {...props}>
-      <div className="overflow-hidden relative rounded-t-xl w-full bg-background animate-pulse aspect-[4/5]" />
+      <div className="overflow-hidden relative rounded-t-xl w-full bg-background animate-pulse aspect-[2/3]" />
       <div className="flex flex-col gap-2 py-1 flex-grow">
         <div className="flex flex-col gap-2 px-2 mb-4">
           <div className="bg-foreground/50 animate-pulse w-36 rounded-sm h-6 mb-6" />
