@@ -30,8 +30,6 @@ export const POST = async (request: Request) => {
     }
     movieInfo[label.toLowerCase()] = value.replace(/\s+/g, " ").trim();
   });
-  console.log(movieInfo);
-  console.log(movieInfo.genre);
   return NextResponse.json({
     synopsis,
     criticsConsensus,
