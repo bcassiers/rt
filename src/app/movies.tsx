@@ -328,7 +328,7 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
             <CalendarIcon className="h-4 w-4" />
             {movie.releaseDateText}
           </span>
-          <HoverCard onOpenChange={setIsOpen}>
+          <HoverCard onOpenChange={setIsOpen} openDelay={150} closeDelay={3000}>
             <HoverCardTrigger asChild>
               <span className="flex gap-1 items-center text-xs text-muted-foreground underline cursor-help">
                 <InformationCircleIcon className="h-4 w-4" />
@@ -391,7 +391,7 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
             })}
           >
             <AcademicCapIcon className="h-5 w-5" />
-            <p>{movie.criticsScore.score}%</p>
+            <p>{movie.criticsScore.score ?? "-- "}%</p>
           </span>
           <span
             className={cn("flex gap-3 items-center text-sm text-foreground font-semibold justify-center", {
@@ -403,7 +403,7 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
             })}
           >
             <TvIcon className="h-5 w-5" />
-            <p>{movie.audienceScore.score}%</p>
+            <p>{movie.audienceScore.score ?? "-- "}%</p>
           </span>
         </div>
       </div>
