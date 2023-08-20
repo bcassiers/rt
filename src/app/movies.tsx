@@ -508,7 +508,7 @@ const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard(
 });
 const MediaCardSkeleton: FC<ComponentPropsWithoutRef<"div">> = ({ ...props }) => {
   return (
-    <div className="flex flex-col gap-2 min-h-fit bg-muted bg-cyan-900/50 rounded-xl" {...props}>
+    <div className="flex flex-col gap-2 min-h-fit bg-cyan-900/50 rounded-xl" {...props}>
       <div className="overflow-hidden relative rounded-t-xl w-full bg-background animate-pulse aspect-[4/5]" />
       <div className="flex flex-col gap-2 py-1 flex-grow">
         <div className="flex flex-col gap-2 px-2 mb-4">
