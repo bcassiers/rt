@@ -1,4 +1,4 @@
-import { Movies } from "./movies";
+import { Movies } from "../components/media-list";
 
 export default function Home() {
   return (
