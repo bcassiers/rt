@@ -315,7 +315,7 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
         target="_blank"
         rel="norefferer"
         href={`https://www.rottentomatoes.com${movie.mediaUrl}`}
-        className="overflow-hidden rounded-t-lg w-full h-[305px]"
+        className="overflow-hidden rounded-t-xl w-full h-[305px]"
       >
         <Image src={movie.posterUri} alt={movie.title} width={206} height={305} className="object-cover transition-all hover:scale-105" />
       </a>
@@ -380,14 +380,14 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
             </HoverCardContent>
           </HoverCard>
         </div>
-        <div className="grid grid-cols-2 divide-x divide-muted-foreground bg-muted px-2 py-3 rounded-md mt-auto mx-1">
+        <div className="grid grid-cols-2 divide-x divide-muted-foreground bg-background px-2 py-3 rounded-lg mt-auto mx-1.5 mb-0.5">
           <span
             className={cn("flex gap-3 items-center text-sm text-foreground font-semibold justify-center", {
-              "text-red-600": criticsScore,
-              "text-orange-600": criticsScore >= 50,
-              "text-yellow-600": criticsScore >= 60,
-              "text-cyan-600": criticsScore >= 70,
-              "text-green-600": criticsScore >= 90,
+              "text-red-500": criticsScore,
+              "text-orange-500": criticsScore >= 50,
+              "text-yellow-500": criticsScore >= 60,
+              "text-cyan-500": criticsScore >= 70,
+              "text-green-500": criticsScore >= 90,
             })}
           >
             <AcademicCapIcon className="h-5 w-5" />
@@ -395,11 +395,11 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
           </span>
           <span
             className={cn("flex gap-3 items-center text-sm text-foreground font-semibold justify-center", {
-              "text-red-600": audienceScore,
-              "text-orange-600": audienceScore >= 50,
-              "text-yellow-600": audienceScore >= 60,
-              "text-cyan-600": audienceScore >= 70,
-              "text-green-600": audienceScore >= 90,
+              "text-red-500": audienceScore,
+              "text-orange-500": audienceScore >= 50,
+              "text-yellow-500": audienceScore >= 60,
+              "text-cyan-500": audienceScore >= 70,
+              "text-green-500": audienceScore >= 90,
             })}
           >
             <TvIcon className="h-5 w-5" />
@@ -412,7 +412,7 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
   if (!!ref)
     return (
       <div
-        className={cn("flex flex-col gap-2 min-h-fit max-w-[206px] bg-background rounded-lg", {
+        className={cn("flex flex-col gap-2 min-h-fit max-w-[206px] bg-muted rounded-xl", {
           "bg-red-900/50": averageScore,
           "bg-orange-900/50": averageScore >= 50,
           "bg-yellow-900/50": averageScore >= 60,
@@ -427,7 +427,7 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
     );
   return (
     <div
-      className={cn("flex flex-col gap-2 min-h-fit max-w-[206px] bg-background rounded-lg", {
+      className={cn("flex flex-col gap-2 min-h-fit max-w-[206px] bg-muted rounded-xl", {
         "bg-red-900/50": averageScore,
         "bg-orange-900/50": averageScore >= 50,
         "bg-yellow-900/50": averageScore >= 60,
