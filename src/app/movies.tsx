@@ -294,15 +294,20 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
   const additionalInfoQuery = useQuery(
     ["Movie", movie.mediaUrl],
     () =>
-      axios.post<Error, AxiosResponse<{ synopsis: string }>, { mediaUrl: string }>(`/api/movies/additionnal-info`, {
-        mediaUrl: movie.mediaUrl,
-      }),
+      axios.post<Error, AxiosResponse<{ synopsis: string; audienceConsensus: string; criticsConsensus: string }>, { mediaUrl: string }>(
+        `/api/movies/additionnal-info`,
+        {
+          mediaUrl: movie.mediaUrl,
+        }
+      ),
     {
       enabled: open,
     }
   );
 
   const synopsis = additionalInfoQuery.data?.data.synopsis;
+  const criticsConsensus = additionalInfoQuery.data?.data.criticsConsensus;
+  const audienceConsensus = additionalInfoQuery.data?.data.audienceConsensus;
 
   const CardContent = () => (
     <>
@@ -337,12 +342,36 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
                   </div>
                 ) : (
                   <>
-                    <div className="flex gap-2 items-center">
-                      <Bars3BottomLeftIcon className="h-4 w-4" />
-                      <span className="font-bold text-foreground">Synopsis</span>
-                    </div>
-                    <hr className="border-muted-foreground" />
-                    <p className="text-muted-foreground">{synopsis ?? "No synopsis found."}</p>
+                    {synopsis ? (
+                      <>
+                        <div className="flex gap-2 items-center">
+                          <Bars3BottomLeftIcon className="h-4 w-4" />
+                          <span className="font-bold text-foreground">Synopsis</span>
+                        </div>
+                        <hr className="border-muted-foreground" />
+                        <p className="text-muted-foreground">{synopsis}</p>
+                      </>
+                    ) : null}
+                    {criticsConsensus ? (
+                      <>
+                        <div className="flex gap-2 items-center">
+                          <AcademicCapIcon className="h-4 w-4" />
+                          <span className="font-bold text-foreground">Critics Consensus</span>
+                        </div>
+                        <hr className="border-muted-foreground" />
+                        <p className="text-muted-foreground">{criticsConsensus}</p>
+                      </>
+                    ) : null}
+                    {audienceConsensus ? (
+                      <>
+                        <div className="flex gap-2 items-center">
+                          <TvIcon className="h-4 w-4" />
+                          <span className="font-bold text-foreground">Audience Consensus</span>
+                        </div>
+                        <hr className="border-muted-foreground" />
+                        <p className="text-muted-foreground">{audienceConsensus}</p>
+                      </>
+                    ) : null}
                   </>
                 )}
               </div>

@@ -14,5 +14,7 @@ export const POST = async (request: Request) => {
 
   // Extract the content of the element with the specified data-qa attribute
   const synopsis = $('[data-qa="movie-info-synopsis"]').text().trim();
-  return NextResponse.json({ synopsis });
+  const criticsConsensus = $('[data-qa="critics-consensus"]').text().trim();
+  const audienceConsensus = $('[data-qa="audience-consensus"]').text().trim();
+  return NextResponse.json({ synopsis, criticsConsensus, audienceConsensus });
 };
