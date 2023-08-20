@@ -15,8 +15,22 @@ import {
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 import { cn } from "@/lib/utils";
-import type { AffiliateOption, AudienceScoreOption, CriticsScoreOption, GenreOption, SortOption } from "@/types/rotten-tomatoes";
-import { AUDIENCE_SCORE_OPTIONS, AFFILIATE_OPTIONS, CRITICS_SCORE_OPTIONS, GENRE_OPTIONS, SORT_OPTIONS } from "@/types/rotten-tomatoes";
+import type {
+  AffiliateOption,
+  AudienceScoreOption,
+  CriticsScoreOption,
+  GenreOption,
+  ResourceType,
+  SortOption,
+} from "@/types/rotten-tomatoes";
+import {
+  AUDIENCE_SCORE_OPTIONS,
+  AFFILIATE_OPTIONS,
+  CRITICS_SCORE_OPTIONS,
+  GENRE_OPTIONS,
+  SORT_OPTIONS,
+  RESOURCE_TYPES,
+} from "@/types/rotten-tomatoes";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -34,6 +48,7 @@ import type { Movie, MovieQuery, MoviesQueryParameters } from "@/types/movies";
 import { Slider } from "@/components/ui/slider";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
   const [genreFilter, setGenreFilter] = useState<GenreOption[]>([]);
@@ -43,9 +58,9 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
   const [audienceFilter, setAudienceFilter] = useState<AudienceScoreOption[]>([]);
   const { ref, inView } = useInView();
   const [criticsVsAudiencePreference, setCriticsVsAudiencePreference] = useState([50]);
-
+  const [type, setType] = useState<ResourceType>("movies_at_home");
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage } = useInfiniteQuery(
-    ["Movies", genreFilter, criticsFilter, sorting, affiliateFilter, audienceFilter],
+    ["Movies", genreFilter, criticsFilter, sorting, affiliateFilter, audienceFilter, type],
     ({ pageParam }) =>
       axios.post<Error, AxiosResponse<MovieQuery>, MoviesQueryParameters>("/api/movies/search", {
         filters: {
@@ -56,6 +71,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
           sort: sorting,
         },
         page: pageParam,
+        type,
       }),
     {
       getNextPageParam: (lastPage) => lastPage.data.nextPage,
@@ -110,8 +126,15 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
 
   const movieList = data?.pages.reduce((acc, page) => [...acc, ...page.data.grid.list], [] as MovieQuery["grid"]["list"]);
   return (
-    <div className="flex flex-col px-10">
+    <Tabs className="flex flex-col px-10" value={type} onValueChange={(value) => setType(value as ResourceType)}>
       <div className="flex flex-col gap-3 sticky top-0 py-4 bg-background border-b border-foreground z-10">
+        <TabsList className="grid grid-cols-3 w-fit">
+          {toPairs(RESOURCE_TYPES).map(([key, value]) => (
+            <TabsTrigger value={key} key={key}>
+              {value}
+            </TabsTrigger>
+          ))}
+        </TabsList>
         <div className="flex gap-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -281,7 +304,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
           />
         ))}
       </div>
-    </div>
+    </Tabs>
   );
 };
 type MovieCardProps = ComponentPropsWithoutRef<"div"> & { movie: Movie; criticsVsAudiencePreference: number[] };

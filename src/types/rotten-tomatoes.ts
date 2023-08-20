@@ -2,10 +2,10 @@ export const SORT_OPTIONS = {
   popular: "Popularity",
   newest: "Release date",
   a_z: "Title",
-  audience_lowest: "Highest audience score",
-  audience_highest: "Lowest audience score",
-  critics_lowest: "Highest critics score",
-  critics_highest: "Lowest critics score",
+  audience_lowest: "Lowest audience score",
+  audience_highest: "Highest audience score",
+  critics_lowest: "Lowest critics score",
+  critics_highest: "Highest critics score",
 };
 
 export type SortOption = keyof typeof SORT_OPTIONS;
@@ -103,3 +103,11 @@ export type FilterOptions = {
   rating?: RatingOption[];
   affiliate?: AffiliateOption[];
 };
+
+export const RESOURCE_TYPES = {
+  movies_at_home: "Movies at home",
+  movies_in_theaters: "Movies in theaters",
+  tv_series_browse: "TV shows",
+};
+
+export type ResourceType = keyof typeof RESOURCE_TYPES;

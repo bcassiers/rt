@@ -1,4 +1,4 @@
-import type { FilterOptions } from "./rotten-tomatoes";
+import type { FilterOptions, ResourceType } from "./rotten-tomatoes";
 
 export type MovieQuery = {
   title: string;
@@ -13,6 +13,7 @@ export type MovieQuery = {
 export type MoviesQueryParameters = {
   filters: FilterOptions;
   page?: number;
+  type: ResourceType;
 };
 
 export type Movie = {
