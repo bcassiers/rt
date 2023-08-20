@@ -334,7 +334,7 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
               </span>
             </HoverCardTrigger>
             <HoverCardContent className="w-96 max-h-80 overflow-scroll bg-muted  border">
-              <div className="text-sm flex flex-col gap-2 flex-wrap">
+              <div className="text-sm flex flex-col gap-5 flex-wrap">
                 {additionalInfoQuery.isLoading ? (
                   <div className="flex gap-2 items-center">
                     <ArrowsUpDownIcon className="h-4 w-4" />
@@ -343,34 +343,34 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
                 ) : (
                   <>
                     {synopsis ? (
-                      <>
+                      <div className="flex flex-col gap-2">
                         <div className="flex gap-2 items-center">
                           <Bars3BottomLeftIcon className="h-4 w-4" />
                           <span className="font-bold text-foreground">Synopsis</span>
                         </div>
                         <hr className="border-muted-foreground" />
                         <p className="text-muted-foreground">{synopsis}</p>
-                      </>
+                      </div>
                     ) : null}
                     {criticsConsensus ? (
-                      <>
+                      <div className="flex flex-col gap-2">
                         <div className="flex gap-2 items-center">
                           <AcademicCapIcon className="h-4 w-4" />
                           <span className="font-bold text-foreground">Critics Consensus</span>
                         </div>
                         <hr className="border-muted-foreground" />
                         <p className="text-muted-foreground">{criticsConsensus}</p>
-                      </>
+                      </div>
                     ) : null}
                     {audienceConsensus ? (
-                      <>
+                      <div className="flex flex-col gap-2">
                         <div className="flex gap-2 items-center">
                           <TvIcon className="h-4 w-4" />
                           <span className="font-bold text-foreground">Audience Consensus</span>
                         </div>
                         <hr className="border-muted-foreground" />
                         <p className="text-muted-foreground">{audienceConsensus}</p>
-                      </>
+                      </div>
                     ) : null}
                   </>
                 )}
