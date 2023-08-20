@@ -268,11 +268,11 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
             <p>Audience</p>
           </div>
         </div>
-        {(filters.genre.length ||
-          filters.criticsScore.length ||
-          filters.audienceScore.length ||
-          filters.affiliate.length ||
-          filters.sort.length) && (
+        {filters.genre.length ||
+        filters.criticsScore.length ||
+        filters.audienceScore.length ||
+        filters.affiliate.length ||
+        filters.sort.length ? (
           <div className="text-sm flex gap-3 h-fit items-center flex-wrap">
             <p className="font-bold">Active filters :</p>
             {filters.genre.map((genre) => (
@@ -317,7 +317,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
               Clear all
             </Button>
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 md:gap-x-6 md:gap-y-8 py-10 flex-wrap">
