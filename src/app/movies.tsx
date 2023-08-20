@@ -45,9 +45,9 @@ import { useInView } from "react-intersection-observer";
 import toPairs from "lodash/toPairs";
 import type { Media, MovieQuery, MediaQueryParameters } from "@/types/movies";
 import { Slider } from "@/components/ui/slider";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
   const [genreFilter, setGenreFilter] = useState<GenreOption[]>([]);
@@ -56,7 +56,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
   const [sorting, setSorting] = useState<SortOption | undefined>();
   const [audienceFilter, setAudienceFilter] = useState<AudienceScoreOption[]>([]);
   const { ref, inView } = useInView();
-  const [criticsVsAudiencePreference, setCriticsVsAudiencePreference] = useState([50]);
+  const [criticsVsAudiencePreference, setCriticsVsAudiencePreference] = useState([1]);
   const [type, setType] = useState<ResourceType>("movies_at_home");
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage } = useInfiniteQuery(
     ["Movies", genreFilter, criticsFilter, sorting, affiliateFilter, audienceFilter, type],
@@ -247,7 +247,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
           <div className="ml-auto flex gap-3 w-[500px] items-center">
             Preference :<p>Critics</p>
             <Slider
-              max={100}
+              max={2}
               step={1}
               value={criticsVsAudiencePreference}
               onValueChange={setCriticsVsAudiencePreference}
@@ -323,7 +323,7 @@ type MediaCardProps = ComponentPropsWithoutRef<"div"> & { media: Media; criticsV
 const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard({ media, criticsVsAudiencePreference, ...props }, ref) {
   const audienceScore = Number(media.audienceScore.score);
   const criticsScore = Number(media.criticsScore.score);
-  const averageScore = (audienceScore * criticsVsAudiencePreference[0] + criticsScore * (100 - criticsVsAudiencePreference[0])) / 100;
+  const averageScore = (audienceScore * criticsVsAudiencePreference[0] + criticsScore * (2 - criticsVsAudiencePreference[0])) / 2;
 
   const additionalInfoQuery = useQuery(["Movie", media.mediaUrl], () =>
     axios.post<
@@ -394,14 +394,14 @@ const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard(
             </span>
           )}
 
-          <HoverCard openDelay={150} closeDelay={3000}>
-            <HoverCardTrigger asChild>
-              <span className="flex gap-1 items-center text-xs text-muted-foreground underline cursor-help">
+          <Popover>
+            <PopoverTrigger asChild>
+              <span className="flex gap-1 items-center text-xs text-muted-foreground underline cursor-pointer">
                 <InformationCircleIcon className="h-4 w-4" />
                 Additionnal info
               </span>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-96 max-h-80 overflow-scroll bg-muted  border">
+            </PopoverTrigger>
+            <PopoverContent className="w-96 max-h-80 overflow-scroll bg-muted  border">
               <div className="text-sm flex flex-col gap-5 flex-wrap">
                 {additionalInfoQuery.isLoading ? (
                   <div className="flex gap-2 items-center">
@@ -443,12 +443,12 @@ const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard(
                   </>
                 )}
               </div>
-            </HoverCardContent>
-          </HoverCard>
+            </PopoverContent>
+          </Popover>
         </div>
         <div className="grid grid-cols-2 divide-x divide-muted-foreground bg-background px-2 py-3 rounded-lg mt-auto mx-1.5 mb-0.5">
           <span
-            className={cn("flex gap-3 items-center text-sm text-foreground font-semibold justify-center", {
+            className={cn("flex gap-2 md:gap-3 items-center text-xs md:text-sm text-foreground font-semibold justify-center", {
               "text-red-500": criticsScore,
               "text-orange-500": criticsScore >= 50,
               "text-yellow-500": criticsScore >= 60,
@@ -456,11 +456,11 @@ const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard(
               "text-green-500": criticsScore >= 90,
             })}
           >
-            <AcademicCapIcon className="h-5 w-5" />
+            <AcademicCapIcon className="h-3 md:h-5 w-3 md:w-5" />
             <p>{media.criticsScore.score ?? "-- "}%</p>
           </span>
           <span
-            className={cn("flex gap-3 items-center text-sm text-foreground font-semibold justify-center", {
+            className={cn("flex gap-3 items-center text-xs md:text-sm text-foreground font-semibold justify-center", {
               "text-red-500": audienceScore,
               "text-orange-500": audienceScore >= 50,
               "text-yellow-500": audienceScore >= 60,
@@ -468,7 +468,7 @@ const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard(
               "text-green-500": audienceScore >= 90,
             })}
           >
-            <TvIcon className="h-5 w-5" />
+            <TvIcon className="h-3 md:h-5 w-3 md:w-5" />
             <p>{media.audienceScore.score ?? "-- "}%</p>
           </span>
         </div>
