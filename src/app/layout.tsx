@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={cn("min-h-screen dark", inter.className)}>
+      <body className={cn("min-h-screen", inter.className)}>
         <Providers>{children}</Providers>
         <Analytics />
       </body>

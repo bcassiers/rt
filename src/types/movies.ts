@@ -4,19 +4,19 @@ export type MovieQuery = {
   title: string;
   grid: {
     id: string;
-    list: Movie[];
+    list: Media[];
   };
   pageInfo: { startCursor: string; endCursor: string; hasNextPage: boolean; hasPreviousPage: boolean };
   nextPage?: number;
 };
 
-export type MoviesQueryParameters = {
+export type MediaQueryParameters = {
   filters: FilterOptions;
   page?: number;
   type: ResourceType;
 };
 
-export type Movie = {
+export type Media = {
   audienceScore: {
     score: string;
     sentiment: string;

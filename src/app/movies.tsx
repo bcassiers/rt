@@ -40,7 +40,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useInView } from "react-intersection-observer";
 import toPairs from "lodash/toPairs";
-import type { Movie, MovieQuery, MoviesQueryParameters } from "@/types/movies";
+import type { Media, MovieQuery, MediaQueryParameters } from "@/types/movies";
 import { Slider } from "@/components/ui/slider";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
@@ -58,7 +58,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage } = useInfiniteQuery(
     ["Movies", genreFilter, criticsFilter, sorting, affiliateFilter, audienceFilter, type],
     ({ pageParam }) =>
-      axios.post<Error, AxiosResponse<MovieQuery>, MoviesQueryParameters>("/api/movies/search", {
+      axios.post<Error, AxiosResponse<MovieQuery>, MediaQueryParameters>("/api/movies/search", {
         filters: {
           genre: genreFilter,
           criticsScore: criticsFilter,
@@ -254,7 +254,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
           </div>
         </div>
         {(genreFilter.length || criticsFilter.length || audienceFilter.length || affiliateFilter.length || sorting) && (
-          <div className="text-sm flex gap-3 h-10 items-center">
+          <div className="text-sm flex gap-3 h-fit items-center flex-wrap">
             <p className="font-bold">Active filters :</p>
             {genreFilter.map((genre) => (
               <Badge key={genre} className="cursor-pointer bg-blue-300" onClick={() => handleGenreFiltersCheckedChange(genre)}>
@@ -314,7 +314,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
     </Tabs>
   );
 };
-type MediaCardProps = ComponentPropsWithoutRef<"div"> & { media: Movie; criticsVsAudiencePreference: number[] };
+type MediaCardProps = ComponentPropsWithoutRef<"div"> & { media: Media; criticsVsAudiencePreference: number[] };
 const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard({ media, criticsVsAudiencePreference, ...props }, ref) {
   const audienceScore = Number(media.audienceScore.score);
   const criticsScore = Number(media.criticsScore.score);

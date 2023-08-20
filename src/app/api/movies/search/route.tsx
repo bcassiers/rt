@@ -1,9 +1,9 @@
-import type { MovieQuery, MoviesQueryParameters } from "@/types/movies";
+import type { MovieQuery, MediaQueryParameters } from "@/types/movies";
 import axios from "axios";
 import { NextResponse } from "next/server";
 
 export const POST = async (request: Request) => {
-  const requestBody: MoviesQueryParameters = await request.json();
+  const requestBody: MediaQueryParameters = await request.json();
   const { filters, page, type } = requestBody;
   const filterElements = [];
   if (filters.affiliate && filters.affiliate.length > 0) filterElements.push(`affiliates:${filters.affiliate.join(",")}`);
