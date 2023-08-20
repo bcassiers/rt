@@ -321,7 +321,9 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
       </a>
       <div className="flex flex-col gap-2 py-1 flex-grow">
         <div className="flex flex-col gap-2 px-2 mb-4">
-          <h2 className="font-medium text-md max-w-[200px] overflow-clip">{movie.title}</h2>
+          <h2 className="font-medium text-md max-w-[200px] overflow-clip">
+            {`${movie.criticsScore.certifiedAttribute ? "⭐️ " : ""}${movie.title}`}
+          </h2>
           <span className="flex gap-1 items-center text-xs text-muted-foreground">
             <CalendarIcon className="h-4 w-4" />
             {movie.releaseDateText}
@@ -416,7 +418,6 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
           "bg-yellow-900/50": averageScore >= 60,
           "bg-cyan-900/50": averageScore >= 70,
           "bg-green-900/50": averageScore >= 90,
-          "border-2 border-yellow-300": movie.criticsScore.certifiedAttribute,
         })}
         ref={ref}
         {...props}
@@ -432,7 +433,6 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
         "bg-yellow-900/50": averageScore >= 60,
         "bg-cyan-900/50": averageScore >= 70,
         "bg-green-900/50": averageScore >= 90,
-        "border-2 border-yellow-300": movie.criticsScore.certifiedAttribute,
       })}
       {...props}
     >
