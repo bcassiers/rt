@@ -10,8 +10,10 @@ import {
   ArrowsUpDownIcon,
   Bars3BottomLeftIcon,
   CalendarIcon,
+  ComputerDesktopIcon,
   InformationCircleIcon,
   TvIcon,
+  VideoCameraIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 import { cn } from "@/lib/utils";
@@ -23,14 +25,7 @@ import type {
   ResourceType,
   SortOption,
 } from "@/types/rotten-tomatoes";
-import {
-  AUDIENCE_SCORE_OPTIONS,
-  AFFILIATE_OPTIONS,
-  CRITICS_SCORE_OPTIONS,
-  GENRE_OPTIONS,
-  SORT_OPTIONS,
-  RESOURCE_TYPES,
-} from "@/types/rotten-tomatoes";
+import { AUDIENCE_SCORE_OPTIONS, AFFILIATE_OPTIONS, CRITICS_SCORE_OPTIONS, GENRE_OPTIONS, SORT_OPTIONS } from "@/types/rotten-tomatoes";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -129,11 +124,18 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
     <Tabs className="flex flex-col px-3 md:px-10" value={type} onValueChange={(value) => setType(value as ResourceType)}>
       <div className="flex flex-col gap-3 sticky top-0 py-2 md:py-4 bg-background border-b border-foreground z-10">
         <TabsList className="flex w-fit">
-          {toPairs(RESOURCE_TYPES).map(([key, value]) => (
-            <TabsTrigger value={key} key={key}>
-              {value}
-            </TabsTrigger>
-          ))}
+          <TabsTrigger value="movies_at_home" className="flex gap-2">
+            <TvIcon className="h-4 md:h-5" />
+            <p className="hidden sm:block">Movies at home</p>
+          </TabsTrigger>
+          <TabsTrigger value="movies_in_theaters" className="flex gap-2">
+            <VideoCameraIcon className="h-4 md:h-5" />
+            <p className="hidden sm:block">Movies in theaters</p>
+          </TabsTrigger>
+          <TabsTrigger value="tv_series_browse" className="flex gap-2">
+            <ComputerDesktopIcon className="h-4 md:h-5" />
+            <p className="hidden sm:block">TV Shows</p>
+          </TabsTrigger>
         </TabsList>
         <div className="flex gap-3 flex-wrap">
           <DropdownMenu>
@@ -235,7 +237,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
             </DropdownMenuContent>
           </DropdownMenu>
           <div className="ml-auto flex gap-3 w-[500px] items-center">
-            <p>Critics Preference</p>
+            Preference :<p>Critics</p>
             <Slider
               max={100}
               step={1}
@@ -243,7 +245,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
               onValueChange={setCriticsVsAudiencePreference}
               className="max-w-54 w-54 flex-grow"
             />
-            <p>Audience Preference</p>
+            <p>Audience</p>
           </div>
         </div>
         {(genreFilter.length || criticsFilter.length || audienceFilter.length || affiliateFilter.length || sorting) && (
