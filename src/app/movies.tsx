@@ -124,18 +124,18 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
     }
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  const movieList = data?.pages.reduce((acc, page) => [...acc, ...page.data.grid.list], [] as MovieQuery["grid"]["list"]);
+  const mediaList = data?.pages.reduce((acc, page) => [...acc, ...page.data.grid.list], [] as MovieQuery["grid"]["list"]);
   return (
-    <Tabs className="flex flex-col px-10" value={type} onValueChange={(value) => setType(value as ResourceType)}>
-      <div className="flex flex-col gap-3 sticky top-0 py-4 bg-background border-b border-foreground z-10">
-        <TabsList className="grid grid-cols-3 w-fit">
+    <Tabs className="flex flex-col px-3 md:px-10" value={type} onValueChange={(value) => setType(value as ResourceType)}>
+      <div className="flex flex-col gap-3 sticky top-0 py-2 md:py-4 bg-background border-b border-foreground z-10">
+        <TabsList className="flex w-fit">
           {toPairs(RESOURCE_TYPES).map(([key, value]) => (
             <TabsTrigger value={key} key={key}>
               {value}
             </TabsTrigger>
           ))}
         </TabsList>
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className={cn({ "border-blue-300": genreFilter.length })}>
@@ -294,33 +294,33 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
         )}
       </div>
 
-      <div className="flex gap-x-6 gap-y-8 py-10 flex-wrap">
-        {movieList?.map((movie, index) => (
-          <MovieCard
-            movie={movie}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 md:gap-x-6 md:gap-y-8 py-10 flex-wrap">
+        {mediaList?.map((media, index) => (
+          <MediaCard
+            media={media}
             key={index}
             criticsVsAudiencePreference={criticsVsAudiencePreference}
-            ref={index === movieList.length - 1 ? ref : undefined}
+            ref={index === mediaList.length - 1 ? ref : undefined}
           />
         ))}
       </div>
     </Tabs>
   );
 };
-type MovieCardProps = ComponentPropsWithoutRef<"div"> & { movie: Movie; criticsVsAudiencePreference: number[] };
-const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard({ movie, criticsVsAudiencePreference, ...props }, ref) {
-  const audienceScore = Number(movie.audienceScore.score);
-  const criticsScore = Number(movie.criticsScore.score);
+type MediaCardProps = ComponentPropsWithoutRef<"div"> & { media: Movie; criticsVsAudiencePreference: number[] };
+const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard({ media, criticsVsAudiencePreference, ...props }, ref) {
+  const audienceScore = Number(media.audienceScore.score);
+  const criticsScore = Number(media.criticsScore.score);
   const averageScore = (audienceScore * criticsVsAudiencePreference[0] + criticsScore * (100 - criticsVsAudiencePreference[0])) / 100;
   const [open, setIsOpen] = useState(false);
 
   const additionalInfoQuery = useQuery(
-    ["Movie", movie.mediaUrl],
+    ["Movie", media.mediaUrl],
     () =>
       axios.post<Error, AxiosResponse<{ synopsis: string; audienceConsensus: string; criticsConsensus: string }>, { mediaUrl: string }>(
         `/api/movies/additionnal-info`,
         {
-          mediaUrl: movie.mediaUrl,
+          mediaUrl: media.mediaUrl,
         }
       ),
     {
@@ -337,19 +337,19 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
       <a
         target="_blank"
         rel="norefferer"
-        href={`https://www.rottentomatoes.com${movie.mediaUrl}`}
-        className="overflow-hidden rounded-t-xl w-full h-[305px]"
+        href={`https://www.rottentomatoes.com${media.mediaUrl}`}
+        className="overflow-hidden relative rounded-t-xl w-full aspect-[2/3]"
       >
-        <Image src={movie.posterUri} alt={movie.title} width={206} height={305} className="object-cover transition-all hover:scale-105" />
+        <Image src={media.posterUri} alt={media.title} fill className="object-cover transition-all hover:scale-105" />
       </a>
       <div className="flex flex-col gap-2 py-1 flex-grow">
         <div className="flex flex-col gap-2 px-2 mb-4">
           <h2 className="font-medium text-md max-w-[200px] overflow-clip">
-            {`${movie.criticsScore.certifiedAttribute ? "⭐️ " : ""}${movie.title}`}
+            {`${media.criticsScore.certifiedAttribute ? "⭐️ " : ""}${media.title}`}
           </h2>
           <span className="flex gap-1 items-center text-xs text-muted-foreground">
             <CalendarIcon className="h-4 w-4" />
-            {movie.releaseDateText}
+            {media.releaseDateText}
           </span>
           <HoverCard onOpenChange={setIsOpen} openDelay={150} closeDelay={3000}>
             <HoverCardTrigger asChild>
@@ -414,7 +414,7 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
             })}
           >
             <AcademicCapIcon className="h-5 w-5" />
-            <p>{movie.criticsScore.score ?? "-- "}%</p>
+            <p>{media.criticsScore.score ?? "-- "}%</p>
           </span>
           <span
             className={cn("flex gap-3 items-center text-sm text-foreground font-semibold justify-center", {
@@ -426,7 +426,7 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
             })}
           >
             <TvIcon className="h-5 w-5" />
-            <p>{movie.audienceScore.score ?? "-- "}%</p>
+            <p>{media.audienceScore.score ?? "-- "}%</p>
           </span>
         </div>
       </div>
@@ -435,7 +435,7 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
   if (!!ref)
     return (
       <div
-        className={cn("flex flex-col gap-2 min-h-fit max-w-[206px] bg-muted rounded-xl", {
+        className={cn("flex flex-col gap-2 min-h-fit bg-muted rounded-xl", {
           "bg-red-900/50": averageScore,
           "bg-orange-900/50": averageScore >= 50,
           "bg-yellow-900/50": averageScore >= 60,
@@ -450,7 +450,7 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
     );
   return (
     <div
-      className={cn("flex flex-col gap-2 min-h-fit max-w-[206px] bg-muted rounded-xl", {
+      className={cn("flex flex-col gap-2 min-h-fit bg-muted rounded-xl", {
         "bg-red-900/50": averageScore,
         "bg-orange-900/50": averageScore >= 50,
         "bg-yellow-900/50": averageScore >= 60,
@@ -463,4 +463,4 @@ const MovieCard = forwardRef<HTMLDivElement, MovieCardProps>(function MovieCard(
     </div>
   );
 });
-MovieCard.displayName = "MovieCard";
+MediaCard.displayName = "MovieCard";
