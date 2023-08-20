@@ -107,6 +107,7 @@ export type FilterOptions = {
 export const RESOURCE_TYPES = {
   movies_at_home: "Movies at home",
   movies_in_theaters: "Movies in theaters",
+  movies_coming_soon: "Movies coming soon",
   tv_series_browse: "TV shows",
 };
 

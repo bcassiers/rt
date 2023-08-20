@@ -10,6 +10,7 @@ import {
   ArrowsUpDownIcon,
   Bars3BottomLeftIcon,
   CalendarIcon,
+  ChevronDoubleRightIcon,
   ComputerDesktopIcon,
   InformationCircleIcon,
   TvIcon,
@@ -135,6 +136,10 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
           <TabsTrigger value="tv_series_browse" className="flex gap-2">
             <ComputerDesktopIcon className="h-4 md:h-5" />
             <p className="hidden sm:block">TV Shows</p>
+          </TabsTrigger>
+          <TabsTrigger value="movies_coming_soon" className="flex gap-2">
+            <ChevronDoubleRightIcon className="h-4 md:h-5" />
+            <p className="hidden sm:block">Coming soon</p>
           </TabsTrigger>
         </TabsList>
         <div className="flex gap-3 flex-wrap">
