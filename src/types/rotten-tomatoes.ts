@@ -96,12 +96,12 @@ export const AFFILIATE_OPTIONS = {
 export type AffiliateOption = keyof typeof AFFILIATE_OPTIONS;
 
 export type FilterOptions = {
-  sort?: SortOption;
-  genre?: GenreOption[];
-  audienceScore?: AudienceScoreOption[];
-  criticsScore?: CriticsScoreOption[];
-  rating?: RatingOption[];
-  affiliate?: AffiliateOption[];
+  sort: SortOption[];
+  genre: GenreOption[];
+  audienceScore: AudienceScoreOption[];
+  criticsScore: CriticsScoreOption[];
+  rating: RatingOption[];
+  affiliate: AffiliateOption[];
 };
 
 export const RESOURCE_TYPES = {

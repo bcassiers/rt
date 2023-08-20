@@ -38,5 +38,6 @@ export const POST = async (request: Request) => {
     writer: movieInfo.writer,
     genres: movieInfo.genre,
     starring: movieInfo.starring,
+    releaseDate: movieInfo["release date (theaters)"] ?? movieInfo["release date (streaming)"],
   });
 };

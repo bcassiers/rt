@@ -25,6 +25,7 @@ import type {
   AffiliateOption,
   AudienceScoreOption,
   CriticsScoreOption,
+  FilterOptions,
   GenreOption,
   ResourceType,
   SortOption,
@@ -48,27 +49,78 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useSearchParams } from "next/navigation";
+import { isArray } from "lodash";
+
+const initialFilters: FilterOptions = {
+  genre: [],
+  criticsScore: [],
+  affiliate: [],
+  audienceScore: [],
+  rating: [],
+  sort: [],
+};
+
+// this type is used to infer the type of the value in the handleFilterChange function
+type FilterValueType<T extends keyof FilterOptions> = FilterOptions[T][number];
+
+const useFilters = () => {
+  // const router = useRouter();
+  // const pathname = usePathname();
+  const [filters, setFilters] = useState<FilterOptions>(initialFilters);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    // Initialize filters from query params on component mount or route change
+    const genre = searchParams.get("genre")?.split(",") ?? [];
+    const criticsScore = searchParams.get("criticsScore")?.split(",") ?? [];
+    const affiliate = searchParams.get("affiliate")?.split(",") ?? [];
+    const audienceScore = searchParams.get("audienceScore")?.split(",") ?? [];
+    const sort = searchParams.get("sort")?.split(",") ?? [];
+
+    setFilters({
+      genre: (genre ? (isArray(genre) ? genre : [genre]) : []) as GenreOption[],
+      criticsScore: (criticsScore ? (isArray(criticsScore) ? criticsScore : [criticsScore]) : []) as CriticsScoreOption[],
+      affiliate: (affiliate ? (isArray(affiliate) ? affiliate : [affiliate]) : []) as AffiliateOption[],
+      audienceScore: (audienceScore ? (isArray(audienceScore) ? audienceScore : [audienceScore]) : []) as AudienceScoreOption[],
+      sort: (sort ? (isArray(sort) ? sort : [sort]) : []) as SortOption[],
+      rating: [],
+    });
+  }, [searchParams]);
+
+  const handleFilterChange = <T extends keyof FilterOptions>(type: T, value: FilterValueType<T>) => {
+    setFilters((prev) => {
+      const currentFilter = prev[type] as unknown[];
+      if (currentFilter.includes(value)) {
+        return { ...prev, [type]: currentFilter.filter((item) => item !== value) };
+      } else {
+        return { ...prev, [type]: [...currentFilter, value] };
+      }
+    });
+    // Update query params for array-based filters
+    // searchParams.set(type, filters[type].join(","));
+  };
+
+  const resetFilters = () => {
+    setFilters(initialFilters);
+    // Reset query params
+    // router.replace(pathname);
+  };
+
+  return { filters, handleFilterChange, resetFilters };
+};
 
 export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
-  const [genreFilter, setGenreFilter] = useState<GenreOption[]>([]);
-  const [criticsFilter, setCriticsFilter] = useState<CriticsScoreOption[]>([]);
-  const [affiliateFilter, setAffiliateFilter] = useState<AffiliateOption[]>([]);
-  const [sorting, setSorting] = useState<SortOption | undefined>();
-  const [audienceFilter, setAudienceFilter] = useState<AudienceScoreOption[]>([]);
   const { ref, inView } = useInView();
   const [criticsVsAudiencePreference, setCriticsVsAudiencePreference] = useState([1]);
   const [type, setType] = useState<ResourceType>("movies_at_home");
+  const { filters, handleFilterChange, resetFilters } = useFilters();
+
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage } = useInfiniteQuery(
-    ["Movies", genreFilter, criticsFilter, sorting, affiliateFilter, audienceFilter, type],
+    ["Movies", filters, type],
     ({ pageParam }) =>
       axios.post<Error, AxiosResponse<MovieQuery>, MediaQueryParameters>("/api/movies/search", {
-        filters: {
-          genre: genreFilter,
-          criticsScore: criticsFilter,
-          audienceScore: audienceFilter,
-          affiliate: affiliateFilter,
-          sort: sorting,
-        },
+        filters,
         page: pageParam,
         type,
       }),
@@ -76,46 +128,6 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
       getNextPageParam: (lastPage) => lastPage.data.nextPage,
     }
   );
-
-  const handleGenreFiltersCheckedChange = (genre: GenreOption) => {
-    if (genreFilter.includes(genre)) {
-      setGenreFilter(genreFilter.filter((g) => g !== genre));
-    } else {
-      setGenreFilter([...genreFilter, genre]);
-    }
-  };
-
-  const handleCriticsFiltersCheckedChange = (critics: CriticsScoreOption) => {
-    if (criticsFilter.includes(critics)) {
-      setCriticsFilter(criticsFilter.filter((c) => c !== critics));
-    } else {
-      setCriticsFilter([...criticsFilter, critics]);
-    }
-  };
-
-  const handleAudienceFiltersCheckedChange = (audience: AudienceScoreOption) => {
-    if (audienceFilter.includes(audience)) {
-      setAudienceFilter(audienceFilter.filter((a) => a !== audience));
-    } else {
-      setAudienceFilter([...audienceFilter, audience]);
-    }
-  };
-
-  const handleAffiliateFiltersCheckedChange = (affiliate: AffiliateOption) => {
-    if (affiliateFilter.includes(affiliate)) {
-      setAffiliateFilter(affiliateFilter.filter((a) => a !== affiliate));
-    } else {
-      setAffiliateFilter([...affiliateFilter, affiliate]);
-    }
-  };
-
-  const resetFilters = () => {
-    setGenreFilter([]);
-    setCriticsFilter([]);
-    setAudienceFilter([]);
-    setAffiliateFilter([]);
-    setSorting(undefined);
-  };
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -148,7 +160,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
         <div className="flex gap-3 flex-wrap">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className={cn({ "border-blue-300": genreFilter.length })}>
+              <Button variant="outline" className={cn({ "border-blue-300": !!filters.genre.length })}>
                 Genres
               </Button>
             </DropdownMenuTrigger>
@@ -157,8 +169,8 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
               <DropdownMenuSeparator />
               {toPairs(GENRE_OPTIONS).map(([key, value]) => (
                 <DropdownMenuCheckboxItem
-                  checked={genreFilter.includes(key as GenreOption)}
-                  onCheckedChange={() => handleGenreFiltersCheckedChange(key as GenreOption)}
+                  checked={filters.genre.includes(key as GenreOption)}
+                  onCheckedChange={() => handleFilterChange("genre", key as GenreOption)}
                   key={key}
                 >
                   {value}
@@ -168,7 +180,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
           </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className={cn({ "border-yellow-300": criticsFilter.length })}>
+              <Button variant="outline" className={cn({ "border-yellow-300": !!filters.criticsScore.length })}>
                 Critics rating
               </Button>
             </DropdownMenuTrigger>
@@ -177,8 +189,8 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
               <DropdownMenuSeparator />
               {toPairs(CRITICS_SCORE_OPTIONS).map(([key, value]) => (
                 <DropdownMenuCheckboxItem
-                  checked={criticsFilter.includes(key as CriticsScoreOption)}
-                  onCheckedChange={() => handleCriticsFiltersCheckedChange(key as CriticsScoreOption)}
+                  checked={filters.criticsScore.includes(key as CriticsScoreOption)}
+                  onCheckedChange={() => handleFilterChange("criticsScore", key as CriticsScoreOption)}
                   key={key}
                 >
                   {value}
@@ -188,7 +200,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
           </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className={cn({ "border-orange-300": audienceFilter.length })}>
+              <Button variant="outline" className={cn({ "border-orange-300": !!filters.audienceScore.length })}>
                 Audience rating
               </Button>
             </DropdownMenuTrigger>
@@ -197,8 +209,8 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
               <DropdownMenuSeparator />
               {toPairs(AUDIENCE_SCORE_OPTIONS).map(([key, value]) => (
                 <DropdownMenuCheckboxItem
-                  checked={audienceFilter.includes(key as AudienceScoreOption)}
-                  onCheckedChange={() => handleAudienceFiltersCheckedChange(key as AudienceScoreOption)}
+                  checked={filters.audienceScore.includes(key as AudienceScoreOption)}
+                  onCheckedChange={() => handleFilterChange("audienceScore", key as AudienceScoreOption)}
                   key={key}
                 >
                   {value}
@@ -208,7 +220,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
           </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className={cn({ "border-purple-300": affiliateFilter.length })}>
+              <Button variant="outline" className={cn({ "border-purple-300": filters.affiliate.length })}>
                 Platforms
               </Button>
             </DropdownMenuTrigger>
@@ -217,8 +229,8 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
               <DropdownMenuSeparator />
               {toPairs(AFFILIATE_OPTIONS).map(([key, value]) => (
                 <DropdownMenuCheckboxItem
-                  checked={affiliateFilter.includes(key as AffiliateOption)}
-                  onCheckedChange={() => handleAffiliateFiltersCheckedChange(key as AffiliateOption)}
+                  checked={filters.affiliate.includes(key as AffiliateOption)}
+                  onCheckedChange={() => handleFilterChange("affiliate", key as AffiliateOption)}
                   key={key}
                 >
                   {value}
@@ -228,14 +240,14 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
           </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className={cn({ "border-cyan-300": sorting })}>
-                Sorting
+              <Button variant="outline" className={cn({ "border-cyan-300": filters.sort.length })}>
+                sort
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
-              <DropdownMenuLabel>Select the desired sorting</DropdownMenuLabel>
+              <DropdownMenuLabel>Select the desired sort</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup value={sorting} onValueChange={(value) => setSorting(value as SortOption)}>
+              <DropdownMenuRadioGroup value={filters.sort[0]} onValueChange={(value) => handleFilterChange("sort", value as SortOption)}>
                 {toPairs(SORT_OPTIONS).map(([key, value]) => (
                   <DropdownMenuRadioItem value={key} key={key}>
                     {value}
@@ -256,46 +268,50 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
             <p>Audience</p>
           </div>
         </div>
-        {(genreFilter.length || criticsFilter.length || audienceFilter.length || affiliateFilter.length || sorting) && (
+        {(filters.genre.length ||
+          filters.criticsScore.length ||
+          filters.audienceScore.length ||
+          filters.affiliate.length ||
+          filters.sort.length) && (
           <div className="text-sm flex gap-3 h-fit items-center flex-wrap">
             <p className="font-bold">Active filters :</p>
-            {genreFilter.map((genre) => (
-              <Badge key={genre} className="cursor-pointer bg-blue-300" onClick={() => handleGenreFiltersCheckedChange(genre)}>
+            {filters.genre.map((genre) => (
+              <Badge key={genre} className="cursor-pointer bg-blue-300" onClick={() => handleFilterChange("genre", genre)}>
                 {GENRE_OPTIONS[genre]}
               </Badge>
             ))}
-            {criticsFilter.map((criticScoreOption) => (
+            {filters.criticsScore.map((criticScoreOption) => (
               <Badge
                 key={criticScoreOption}
                 className="cursor-pointer bg-yellow-300"
-                onClick={() => handleCriticsFiltersCheckedChange(criticScoreOption)}
+                onClick={() => handleFilterChange("criticsScore", criticScoreOption)}
               >
                 {CRITICS_SCORE_OPTIONS[criticScoreOption]}
               </Badge>
             ))}
-            {audienceFilter.map((audienceScoreOption) => (
+            {filters.audienceScore.map((audienceScoreOption) => (
               <Badge
                 key={audienceScoreOption}
                 className="cursor-pointer bg-orange-300"
-                onClick={() => handleAudienceFiltersCheckedChange(audienceScoreOption)}
+                onClick={() => handleFilterChange("audienceScore", audienceScoreOption)}
               >
                 {AUDIENCE_SCORE_OPTIONS[audienceScoreOption]}
               </Badge>
             ))}
-            {affiliateFilter.map((affiliateOption) => (
+            {filters.affiliate.map((affiliateOption) => (
               <Badge
                 key={affiliateOption}
                 className="cursor-pointer bg-purple-300"
-                onClick={() => handleAffiliateFiltersCheckedChange(affiliateOption)}
+                onClick={() => handleFilterChange("affiliate", affiliateOption)}
               >
                 {AFFILIATE_OPTIONS[affiliateOption]}
               </Badge>
             ))}
-            {!!sorting ? (
-              <Badge className="cursor-pointer bg-cyan-300" onClick={() => setSorting(undefined)}>
-                {SORT_OPTIONS[sorting]}
+            {filters.sort.map((sortOption) => (
+              <Badge key={sortOption} className="cursor-pointer bg-purple-300" onClick={() => handleFilterChange("sort", sortOption)}>
+                {SORT_OPTIONS[sortOption]}
               </Badge>
-            ) : null}
+            ))}
             <Button variant="outline" size="sm" className="flex gap-2" onClick={() => resetFilters()}>
               <XCircleIcon className="h-4 w-4" />
               Clear all
@@ -336,6 +352,7 @@ const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard(
         writer: string;
         genres: string;
         starring: string;
+        releaseDate: string;
       }>,
       { mediaUrl: string }
     >(`/api/movies/additionnal-info`, {
@@ -350,6 +367,7 @@ const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard(
   const writer = additionalInfoQuery.data?.data.writer;
   const genres = additionalInfoQuery.data?.data.genres;
   const starring = additionalInfoQuery.data?.data.starring;
+  const releaseDate = additionalInfoQuery.data?.data.releaseDate;
   const CardContent = () => (
     <>
       <a
@@ -367,7 +385,7 @@ const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard(
           </h2>
           <span className="flex gap-1 items-center text-xs text-muted-foreground">
             <CalendarIcon className="min-h-[1rem] min-w-[1rem] w-4 h-4" />
-            {media.releaseDateText}
+            {releaseDate ?? media.releaseDateText}
           </span>
           {director && (
             <span className="flex gap-1 items-center text-xs text-muted-foreground">

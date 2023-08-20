@@ -8,7 +8,7 @@ export const POST = async (request: Request) => {
   const filterElements = [];
   if (filters.affiliate && filters.affiliate.length > 0) filterElements.push(`affiliates:${filters.affiliate.join(",")}`);
   if (filters.genre && filters.genre.length > 0) filterElements.push(`genres:${filters.genre.join(",")}`);
-  if (filters.sort) filterElements.push(`sort:${filters.sort}`);
+  if (filters.sort) filterElements.push(`sort:${filters.sort.join(",")}`);
   if (filters.criticsScore && filters.criticsScore.length > 0) filterElements.push(`critics:${filters.criticsScore.join(",")}`);
   if (filters.audienceScore && filters.audienceScore.length > 0) filterElements.push(`audience:${filters.audienceScore.join(",")}`);
 
