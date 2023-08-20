@@ -305,14 +305,16 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = () => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 md:gap-x-6 md:gap-y-8 py-10 flex-wrap">
-        {mediaList?.map((media, index) => (
-          <MediaCard
-            media={media}
-            key={index}
-            criticsVsAudiencePreference={criticsVsAudiencePreference}
-            ref={index === mediaList.length - 1 ? ref : undefined}
-          />
-        ))}
+        {mediaList
+          ? mediaList.map((media, index) => (
+              <MediaCard
+                media={media}
+                key={index}
+                criticsVsAudiencePreference={criticsVsAudiencePreference}
+                ref={index === mediaList.length - 1 ? ref : undefined}
+              />
+            ))
+          : Array.from({ length: 20 }).map((_, index) => <MediaCardSkeleton key={index} />)}
       </div>
     </Tabs>
   );
@@ -504,4 +506,28 @@ const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard(
     </div>
   );
 });
+const MediaCardSkeleton: FC<ComponentPropsWithoutRef<"div">> = ({ ...props }) => {
+  return (
+    <div className="flex flex-col gap-2 min-h-fit bg-muted bg-cyan-900/50 rounded-xl" {...props}>
+      <div className="overflow-hidden relative rounded-t-xl w-full bg-background animate-pulse aspect-[4/5]" />
+      <div className="flex flex-col gap-2 py-1 flex-grow">
+        <div className="flex flex-col gap-2 px-2 mb-4">
+          <div className="bg-foreground/50 animate-pulse w-36 rounded-sm h-6 mb-6" />
+          <div className="bg-muted-foreground/50 animate-pulse w-24 rounded-sm h-3" />
+          <div className="bg-muted-foreground/50 animate-pulse w-36 rounded-sm h-3" />
+        </div>
+        <div className="grid grid-cols-2 divide-x divide-muted-foreground bg-background animate-pulse px-2 py-3 rounded-lg mt-auto mx-1.5 mb-0.5">
+          <span className="flex gap-3 items-center text-sm text-foreground font-semibold justify-center">
+            <AcademicCapIcon className="h-5 w-5" />
+            <p>-- %</p>
+          </span>
+          <span className="flex gap-3 items-center text-sm text-foreground font-semibold justify-center">
+            <TvIcon className="h-5 w-5" />
+            <p>-- %</p>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
 MediaCard.displayName = "MovieCard";
