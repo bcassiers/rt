@@ -36,3 +36,14 @@ export type Media = {
   title: string;
   type: string;
 };
+
+export type MediaAdditionnalInfo = {
+  synopsis?: string;
+  criticsConsensus?: string;
+  audienceConsensus?: string;
+  director?: string;
+  writer?: string;
+  genres?: string;
+  starring?: string;
+  releaseDate?: string;
+};

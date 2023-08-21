@@ -1,8 +1,6 @@
-"use client";
 import type { Media } from "@/types/movies";
 import {
   AcademicCapIcon,
-  ArrowsUpDownIcon,
   Bars3BottomLeftIcon,
   BeakerIcon,
   CalendarIcon,
@@ -12,51 +10,21 @@ import {
   TvIcon,
   VideoCameraIcon,
 } from "@heroicons/react/24/outline";
-import { useQuery } from "@tanstack/react-query";
-import type { AxiosResponse } from "axios";
-import axios from "axios";
 import type { ComponentPropsWithoutRef, FC } from "react";
-import { forwardRef } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { fetchMediaAdditionalInfo } from "./actions";
 
-type MediaCardProps = ComponentPropsWithoutRef<"div"> & { media: Media; criticsVsAudiencePreference: number[] };
-export const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function MovieCard(
-  { media, criticsVsAudiencePreference, ...props },
-  ref
-) {
+export type MediaCardProps = ComponentPropsWithoutRef<"div"> & { media: Media; criticsVsAudiencePreference: number[] };
+export const MediaCard: FC<MediaCardProps> = async ({ media, criticsVsAudiencePreference, ...props }) => {
   const audienceScore = Number(media.audienceScore.score);
   const criticsScore = Number(media.criticsScore.score);
   const averageScore = (audienceScore * criticsVsAudiencePreference[0] + criticsScore * (2 - criticsVsAudiencePreference[0])) / 2;
 
-  const additionalInfoQuery = useQuery(["Movie", media.mediaUrl], () =>
-    axios.post<
-      Error,
-      AxiosResponse<{
-        synopsis: string;
-        audienceConsensus: string;
-        criticsConsensus: string;
-        director: string;
-        writer: string;
-        genres: string;
-        starring: string;
-        releaseDate: string;
-      }>,
-      { mediaUrl: string }
-    >(`/api/movies/additionnal-info`, {
-      mediaUrl: media.mediaUrl,
-    })
+  const { synopsis, criticsConsensus, audienceConsensus, director, writer, genres, starring, releaseDate } = await fetchMediaAdditionalInfo(
+    { mediaUrl: media.mediaUrl }
   );
-
-  const synopsis = additionalInfoQuery.data?.data.synopsis;
-  const criticsConsensus = additionalInfoQuery.data?.data.criticsConsensus;
-  const audienceConsensus = additionalInfoQuery.data?.data.audienceConsensus;
-  const director = additionalInfoQuery.data?.data.director;
-  const writer = additionalInfoQuery.data?.data.writer;
-  const genres = additionalInfoQuery.data?.data.genres;
-  const starring = additionalInfoQuery.data?.data.starring;
-  const releaseDate = additionalInfoQuery.data?.data.releaseDate;
   const CardContent = () => (
     <>
       <a
@@ -110,45 +78,36 @@ export const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function Mov
             </PopoverTrigger>
             <PopoverContent className="w-96 max-h-80 overflow-scroll bg-muted  border">
               <div className="text-sm flex flex-col gap-5 flex-wrap">
-                {additionalInfoQuery.isLoading ? (
-                  <div className="flex gap-2 items-center">
-                    <ArrowsUpDownIcon className="h-4 w-4" />
-                    <p className="font-bold text-foreground">Loading...</p>
+                {synopsis ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2 items-center">
+                      <Bars3BottomLeftIcon className="h-4 w-4" />
+                      <span className="font-bold text-foreground">Synopsis</span>
+                    </div>
+                    <hr className="border-muted-foreground" />
+                    <p className="text-muted-foreground">{synopsis}</p>
                   </div>
-                ) : (
-                  <>
-                    {synopsis ? (
-                      <div className="flex flex-col gap-2">
-                        <div className="flex gap-2 items-center">
-                          <Bars3BottomLeftIcon className="h-4 w-4" />
-                          <span className="font-bold text-foreground">Synopsis</span>
-                        </div>
-                        <hr className="border-muted-foreground" />
-                        <p className="text-muted-foreground">{synopsis}</p>
-                      </div>
-                    ) : null}
-                    {criticsConsensus ? (
-                      <div className="flex flex-col gap-2">
-                        <div className="flex gap-2 items-center">
-                          <AcademicCapIcon className="h-4 w-4" />
-                          <span className="font-bold text-foreground">Critics Consensus</span>
-                        </div>
-                        <hr className="border-muted-foreground" />
-                        <p className="text-muted-foreground">{criticsConsensus}</p>
-                      </div>
-                    ) : null}
-                    {audienceConsensus ? (
-                      <div className="flex flex-col gap-2">
-                        <div className="flex gap-2 items-center">
-                          <TvIcon className="h-4 w-4" />
-                          <span className="font-bold text-foreground">Audience Consensus</span>
-                        </div>
-                        <hr className="border-muted-foreground" />
-                        <p className="text-muted-foreground">{audienceConsensus}</p>
-                      </div>
-                    ) : null}
-                  </>
-                )}
+                ) : null}
+                {criticsConsensus ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2 items-center">
+                      <AcademicCapIcon className="h-4 w-4" />
+                      <span className="font-bold text-foreground">Critics Consensus</span>
+                    </div>
+                    <hr className="border-muted-foreground" />
+                    <p className="text-muted-foreground">{criticsConsensus}</p>
+                  </div>
+                ) : null}
+                {audienceConsensus ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2 items-center">
+                      <TvIcon className="h-4 w-4" />
+                      <span className="font-bold text-foreground">Audience Consensus</span>
+                    </div>
+                    <hr className="border-muted-foreground" />
+                    <p className="text-muted-foreground">{audienceConsensus}</p>
+                  </div>
+                ) : null}
               </div>
             </PopoverContent>
           </Popover>
@@ -182,22 +141,6 @@ export const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function Mov
       </div>
     </>
   );
-  if (!!ref)
-    return (
-      <div
-        className={cn("flex flex-col gap-2 min-h-fit bg-muted rounded-xl", {
-          "bg-red-900/50": averageScore,
-          "bg-orange-900/50": averageScore >= 50,
-          "bg-yellow-900/50": averageScore >= 60,
-          "bg-cyan-900/50": averageScore >= 70,
-          "bg-green-900/50": averageScore >= 90,
-        })}
-        ref={ref}
-        {...props}
-      >
-        <CardContent />
-      </div>
-    );
   return (
     <div
       className={cn("flex flex-col gap-2 min-h-fit bg-muted rounded-xl", {
@@ -212,7 +155,7 @@ export const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(function Mov
       <CardContent />
     </div>
   );
-});
+};
 export const MediaCardSkeleton: FC<ComponentPropsWithoutRef<"div">> = ({ ...props }) => {
   return (
     <div className="flex flex-col gap-2 min-h-fit bg-cyan-900/50 rounded-xl" {...props}>
