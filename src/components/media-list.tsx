@@ -1,16 +1,15 @@
 import type { ComponentPropsWithoutRef, FC } from "react";
 import { ComputerDesktopIcon, FilmIcon, TvIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
-import type { ResourceType } from "@/types/rotten-tomatoes";
-import { useInView } from "react-intersection-observer";
-import type { MovieQuery } from "@/types/movies";
-import { Slider } from "@/components/ui/slider";
+// import type { ResourceType } from "@/types/rotten-tomatoes";
+// import type { MovieQuery } from "@/types/movies";
+// import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FILTER_DISPLAY_PROPS, useFilters } from "./filters";
-import { fetchMediaInfo } from "@/app/actions";
-import { MediaCard, MediaCardSkeleton } from "@/app/media-card";
+// import { FILTER_DISPLAY_PROPS, useFilters } from "./filters";
+// import { MediaCard, MediaCardSkeleton } from "@/app/media-card";
+import { fetchMediaList } from "@/app/action-media-list";
+import { LoadMoreMedia } from "./load-more-media";
 
 export const Movies: FC<ComponentPropsWithoutRef<"div">> = async () => {
-  // const { ref, inView } = useInView();
   // const [criticsVsAudiencePreference, setCriticsVsAudiencePreference] = useState([1]);
   // const [type, setType] = useState<ResourceType>("movies_at_home");
   // const { filters, FilterDropdown, ActiveFilters } = useFilters();
@@ -22,7 +21,7 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = async () => {
   // }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage]);
   // const mediaList = data?.pages.reduce((acc, page) => [...acc, ...page.grid.list], [] as MovieQuery["grid"]["list"]);
 
-  const mediaList = await fetchMediaInfo({
+  const { mediaList } = await fetchMediaList({
     filters: { affiliate: [], audienceScore: [], criticsScore: [], genre: [], rating: [], sort: [] },
     page: 1,
     type: "movies_at_home",
@@ -70,10 +69,8 @@ export const Movies: FC<ComponentPropsWithoutRef<"div">> = async () => {
       </div>
       {/* MEDIA GRID */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 md:gap-x-6 md:gap-y-8 py-10 flex-wrap">
-        {mediaList?.grid.list.map((media, index) => <MediaCard media={media} key={index} criticsVsAudiencePreference={[1]} />)}
-        {Array.from({ length: 30 }).map((_, index) => (
-          <MediaCardSkeleton key={index} />
-        ))}
+        {mediaList}
+        <LoadMoreMedia />
       </div>
     </Tabs>
   );

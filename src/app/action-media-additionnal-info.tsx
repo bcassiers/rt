@@ -1,27 +1,6 @@
 "use server";
-import type { MediaAdditionnalInfo, MediaQueryParameters, MovieQuery } from "@/types/movies";
+import type { MediaAdditionnalInfo } from "@/types/movies";
 import * as cheerio from "cheerio";
-
-export const fetchMediaInfo: (props: MediaQueryParameters) => Promise<MovieQuery> = async ({
-  filters,
-  page = 1,
-  type = "movies_at_home",
-}) => {
-  const filterElements = [];
-  if (filters.affiliate && filters.affiliate.length > 0) filterElements.push(`affiliates:${filters.affiliate.join(",")}`);
-  if (filters.genre && filters.genre.length > 0) filterElements.push(`genres:${filters.genre.join(",")}`);
-  if (filters.sort) filterElements.push(`sort:${filters.sort.join(",")}`);
-  if (filters.criticsScore && filters.criticsScore.length > 0) filterElements.push(`critics:${filters.criticsScore.join(",")}`);
-  if (filters.audienceScore && filters.audienceScore.length > 0) filterElements.push(`audience:${filters.audienceScore.join(",")}`);
-
-  const filterQuery = filterElements.join("~");
-
-  const response = await fetch(
-    `https://www.rottentomatoes.com/napi/browse/${type ?? "movies_at_home"}/${filterQuery}?after=${page ?? 1}`
-  ).then((res) => res.json());
-  const nextPage = response.pageInfo.endCursor;
-  return { ...response, nextPage };
-};
 
 export const fetchMediaAdditionalInfo: (props: { mediaUrl: string }) => Promise<MediaAdditionnalInfo> = async ({ mediaUrl }) => {
   const response = await fetch(`https://www.rottentomatoes.com${mediaUrl}`).then((res) => res.text());

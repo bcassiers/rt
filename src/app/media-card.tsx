@@ -14,7 +14,7 @@ import type { ComponentPropsWithoutRef, FC } from "react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { fetchMediaAdditionalInfo } from "./actions";
+import { fetchMediaAdditionalInfo } from "./action-media-additionnal-info";
 
 export type MediaCardProps = ComponentPropsWithoutRef<"div"> & { media: Media; criticsVsAudiencePreference: number[] };
 export const MediaCard: FC<MediaCardProps> = async ({ media, criticsVsAudiencePreference, ...props }) => {
