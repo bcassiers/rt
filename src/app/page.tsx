@@ -1,5 +1,4 @@
 import { LoadMoreMedia } from "@/components/load-more-media";
-import { fetchMediaList } from "./action-media-list";
 import { Filters } from "@/components/filters";
 import type {
   GenreOption,
@@ -10,8 +9,11 @@ import type {
   ResourceType,
 } from "@/types/rotten-tomatoes";
 import { isArray } from "lodash";
+import { Suspense } from "react";
+import { MediaCardSkeleton } from "./media-card";
+import { MediaList } from "./media-list";
 
-export default async function Home({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default function Home({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
   const { genre, criticsScore, affiliate, audienceScore, sort, type } = searchParams;
   const filters = {
     genre: (genre ? (isArray(genre) ? genre : [genre]) : []) as GenreOption[],
@@ -22,18 +24,19 @@ export default async function Home({ searchParams }: { searchParams: { [key: str
     rating: [],
   };
   const resourceType = (type ? (isArray(type) ? type[0] : type) : "movies_at_home") as ResourceType;
-  const { mediaList } = await fetchMediaList({
-    filters,
-    page: 1,
-    type: resourceType,
-  });
 
   return (
     <div className="bg-background">
       <Filters initialFilters={filters} initialType={resourceType} />
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 md:gap-x-6 md:gap-y-8 py-10 flex-wrap px-3 md:px-10 ">
-        {mediaList}
-        <LoadMoreMedia />
+        <Suspense
+          fallback={Array.from({ length: 30 }).map((_, index) => (
+            <MediaCardSkeleton key={index} />
+          ))}
+        >
+          <MediaList filters={filters} type={resourceType} />
+          <LoadMoreMedia />
+        </Suspense>
       </div>
     </div>
   );

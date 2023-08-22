@@ -238,7 +238,6 @@ export const Filters: FC<{ initialFilters: FilterOptions; initialType: ResourceT
     <div className="flex flex-col gap-2 md:gap-6 sticky top-0 py-2 px-3 md:px-10 md:py-6 bg-background border-b border-foreground z-10">
       <div className="flex justify-between gap-2 md:gap-6 items-center">
         <TypeMenu />
-        <div className={cn("h-3 w-3 rounded-full overflow-hidden border border-foreground")} />
       </div>
       <div className="flex justify-between flex-wrap gap-2 md:gap-6">
         <FilterMenu />
