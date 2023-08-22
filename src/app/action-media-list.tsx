@@ -17,9 +17,9 @@ export const fetchMediaList: (props: MediaQueryParameters) => Promise<MovieQuery
 
   const filterQuery = filterElements.join("~");
 
-  const response = await fetch(
-    `https://www.rottentomatoes.com/napi/browse/${type ?? "movies_at_home"}/${filterQuery}?after=${page ?? 1}`
-  ).then((res) => res.json());
+  const response = await fetch(`https://www.rottentomatoes.com/napi/browse/${type ?? "movies_at_home"}/${filterQuery}?after=${page ?? 1}`, {
+    next: { revalidate: 3600 * 3 },
+  }).then((res) => res.json());
   const nextPage = response.pageInfo.endCursor;
   return {
     ...response,

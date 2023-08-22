@@ -3,7 +3,9 @@ import type { MediaAdditionnalInfo } from "@/types/movies";
 import * as cheerio from "cheerio";
 
 export const fetchMediaAdditionalInfo: (props: { mediaUrl: string }) => Promise<MediaAdditionnalInfo> = async ({ mediaUrl }) => {
-  const response = await fetch(`https://www.rottentomatoes.com${mediaUrl}`).then((res) => res.text());
+  const response = await fetch(`https://www.rottentomatoes.com${mediaUrl}`, { next: { revalidate: 3600 * 24 * 7 } }).then((res) =>
+    res.text()
+  );
 
   // Load the HTML into cheerio
   const $ = cheerio.load(response);
