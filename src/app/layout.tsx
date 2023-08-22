@@ -1,7 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Providers } from "./providers";
 import { Analytics } from "@vercel/analytics/react";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={cn("min-h-screen dark", inter.className)}>
-        <Providers>{children}</Providers>
+        {children}
         <Analytics />
       </body>
     </html>

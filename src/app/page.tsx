@@ -30,6 +30,7 @@ export default function Home({ searchParams }: { searchParams: { [key: string]: 
       <Filters initialFilters={filters} initialType={resourceType} />
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 md:gap-x-6 md:gap-y-8 py-10 flex-wrap px-3 md:px-10 ">
         <Suspense
+          key={JSON.stringify(searchParams)}
           fallback={Array.from({ length: 30 }).map((_, index) => (
             <MediaCardSkeleton key={index} />
           ))}

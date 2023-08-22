@@ -21,7 +21,7 @@ export const fetchMediaAdditionalInfo: (props: { mediaUrl: string }) => Promise<
     if ($(element).find("span a").length) {
       value = $(element)
         .find("span a")
-        .map((i, el) => $(el).text().trim())
+        .map((_, el) => $(el).text().trim())
         .get()
         .join(", ");
     }
