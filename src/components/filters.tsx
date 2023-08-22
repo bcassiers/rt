@@ -1,17 +1,11 @@
 "use client";
-
 import { AFFILIATE_OPTIONS, AUDIENCE_SCORE_OPTIONS, CRITICS_SCORE_OPTIONS, GENRE_OPTIONS, SORT_OPTIONS } from "@/types/rotten-tomatoes";
-import type {
-  AffiliateOption,
-  AudienceScoreOption,
-  CriticsScoreOption,
-  GenreOption,
-  SortOption,
-  FilterOptions,
-} from "@/types/rotten-tomatoes";
-import { isArray, toPairs } from "lodash";
-import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import type { ResourceType } from "@/types/rotten-tomatoes";
+import type { FilterOptions } from "@/types/rotten-tomatoes";
+import { toPairs } from "lodash";
+import { usePathname, useRouter } from "next/navigation";
+import type { FC } from "react";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -23,16 +17,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { XCircleIcon } from "@heroicons/react/24/outline";
-
-const initialFilters: FilterOptions = {
-  genre: [],
-  criticsScore: [],
-  affiliate: [],
-  audienceScore: [],
-  rating: [],
-  sort: [],
-};
+import { ChevronDoubleRightIcon, FilmIcon, TvIcon, VideoCameraIcon, XCircleIcon } from "@heroicons/react/24/outline";
+import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
+import { Slider } from "./ui/slider";
 
 // this type is used to infer the type of the value in the handleFilterChange function
 export type FilterValueType<T extends keyof FilterOptions> = FilterOptions[T][number];
@@ -69,56 +56,96 @@ export const FILTER_DISPLAY_PROPS = [
     filterOptions: SORT_OPTIONS,
   },
 ] as FilterDisplayProps<keyof FilterOptions>[];
-export const useFilters = () => {
-  // const router = useRouter();
-  // const pathname = usePathname();
-  const [filters, setFilters] = useState<FilterOptions>(initialFilters);
-  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    // Initialize filters from query params on component mount or route change
-    const genre = searchParams.get("genre")?.split(",") ?? [];
-    const criticsScore = searchParams.get("criticsScore")?.split(",") ?? [];
-    const affiliate = searchParams.get("affiliate")?.split(",") ?? [];
-    const audienceScore = searchParams.get("audienceScore")?.split(",") ?? [];
-    const sort = searchParams.get("sort")?.split(",") ?? [];
+type TypeDisplayProps = {
+  name: string;
+  type: ResourceType;
+  Icon: typeof TvIcon;
+};
 
-    setFilters({
-      genre: (genre ? (isArray(genre) ? genre : [genre]) : []) as GenreOption[],
-      criticsScore: (criticsScore ? (isArray(criticsScore) ? criticsScore : [criticsScore]) : []) as CriticsScoreOption[],
-      affiliate: (affiliate ? (isArray(affiliate) ? affiliate : [affiliate]) : []) as AffiliateOption[],
-      audienceScore: (audienceScore ? (isArray(audienceScore) ? audienceScore : [audienceScore]) : []) as AudienceScoreOption[],
-      sort: (sort ? (isArray(sort) ? sort : [sort]) : []) as SortOption[],
-      rating: [],
-    });
-  }, [searchParams]);
+const TYPE_DISPLAY_PROPS: TypeDisplayProps[] = [
+  {
+    name: "movies at home",
+    type: "movies_at_home",
+    Icon: VideoCameraIcon,
+  },
+  {
+    name: "movies in theaters",
+    type: "movies_in_theaters",
+    Icon: FilmIcon,
+  },
+  {
+    name: "tv shows",
+    type: "tv_series_browse",
+    Icon: TvIcon,
+  },
+  {
+    name: "coming soon",
+    type: "movies_coming_soon",
+    Icon: ChevronDoubleRightIcon,
+  },
+];
 
-  const handleFilterChange = <T extends keyof FilterOptions>(type: T, value: FilterValueType<T>) => {
-    setFilters((prev) => {
-      const currentFilter = prev[type] as unknown[];
-      if (currentFilter.includes(value)) {
-        return { ...prev, [type]: currentFilter.filter((item) => item !== value) };
+export const Filters: FC<{ initialFilters: FilterOptions; type: ResourceType }> = ({ initialFilters, type }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [criticsVsAudiencePreference, setCriticsVsAudiencePreference] = useState([1]);
+
+  const setSearchParams = (newQuery: Record<string, string | string[]>) => {
+    const params = new URLSearchParams();
+
+    for (const [key, value] of Object.entries(newQuery)) {
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          params.append(key, item);
+        }
       } else {
-        return { ...prev, [type]: [...currentFilter, value] };
+        params.append(key, value as string);
       }
-    });
-    // Update query params for array-based filters
-    // searchParams.set(type, filters[type].join(","));
+    }
+
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const handleFilterChange = <T extends keyof FilterOptions>(filterType: T, value: FilterValueType<T>) => {
+    let newQuery;
+    const currentFilter = initialFilters[filterType] as unknown[];
+    if (currentFilter.includes(value)) {
+      newQuery = { ...initialFilters, [filterType]: currentFilter.filter((item) => item !== value) };
+    } else {
+      newQuery = { ...initialFilters, [filterType]: [...currentFilter, value] };
+    }
+    setSearchParams({ ...newQuery, type });
+  };
+
+  const handleTypeChange = (value: ResourceType) => {
+    setSearchParams({ ...initialFilters, type: value });
   };
 
   const resetFilters = () => {
-    setFilters(initialFilters);
-    // Reset query params
-    // router.replace(pathname);
+    router.push(pathname);
   };
 
-  const areSomeFiltersActive = Object.values(filters).some((filter) => filter.length > 0);
+  const areSomeFiltersActive = Object.values(initialFilters).some((filter) => filter.length > 0);
 
-  const Filter = <T extends keyof FilterOptions>({ name, type, filterOptions }: FilterDisplayProps<T>) => {
+  const TypeMenu = () => (
+    <Tabs className="flex flex-col" value={type} onValueChange={(value) => handleTypeChange(value as ResourceType)}>
+      <TabsList className="flex w-fit">
+        {TYPE_DISPLAY_PROPS.map(({ name, type, Icon }) => (
+          <TabsTrigger key={type} value={type} className="flex gap-2">
+            <Icon className="h-4 md:h-5" />
+            <p className="hidden sm:block capitalize">{name}</p>
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
+  );
+
+  const FilterDropdown = <T extends keyof FilterOptions>({ name, type, filterOptions }: FilterDisplayProps<T>) => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className={cn("capitalize", { "border-blue-300": !!filters[type].length })}>
+          <Button variant="outline" className={cn("capitalize", { "border-blue-300": !!initialFilters[type].length })}>
             {name}
           </Button>
         </DropdownMenuTrigger>
@@ -127,7 +154,7 @@ export const useFilters = () => {
           <DropdownMenuSeparator />
           {toPairs<string>(filterOptions).map(([key, value]) => (
             <DropdownMenuCheckboxItem
-              checked={filters[type].includes(key as never)}
+              checked={initialFilters[type].includes(key as never)}
               onCheckedChange={() => handleFilterChange(type, key as FilterValueType<T>)}
               key={key}
             >
@@ -139,13 +166,35 @@ export const useFilters = () => {
     );
   };
 
-  const ActiveFilters = () => (
+  const FilterMenu = () => (
+    <div className="flex gap-3 flex-wrap">
+      {FILTER_DISPLAY_PROPS.map((filterDisplayProps) => (
+        <FilterDropdown key={filterDisplayProps.type} {...filterDisplayProps} />
+      ))}
+    </div>
+  );
+
+  const PreferenceSlider = () => (
+    <div className="ml-auto flex gap-3 w-[500px] items-center">
+      Preference :<p>Critics</p>
+      <Slider
+        max={2}
+        step={1}
+        value={criticsVsAudiencePreference}
+        onValueChange={setCriticsVsAudiencePreference}
+        className="max-w-54 w-54 flex-grow"
+      />
+      <p>Audience</p>
+    </div>
+  );
+
+  const ActiveFiltersList = () => (
     <>
       {areSomeFiltersActive ? (
         <div className="text-sm flex gap-3 h-fit items-center flex-wrap">
           <p className="font-bold">Active filters :</p>
           {FILTER_DISPLAY_PROPS.map((filterDisplayProps) =>
-            filters[filterDisplayProps.type].map((filter) => (
+            initialFilters[filterDisplayProps.type].map((filter) => (
               <Badge
                 key={filter}
                 className={cn("cursor-pointer", {
@@ -170,5 +219,14 @@ export const useFilters = () => {
     </>
   );
 
-  return { filters, handleFilterChange, resetFilters, areSomeFiltersActive, FilterDropdown: Filter, ActiveFilters };
+  return (
+    <div className="flex flex-col gap-2 md:gap-6 sticky top-0 py-2 px-3 md:px-10 md:py-6 bg-background border-b border-foreground z-10">
+      <TypeMenu />
+      <div className="flex justify-between flex-wrap gap-2 md:gap-6">
+        <FilterMenu />
+        <PreferenceSlider />
+      </div>
+      <ActiveFiltersList />
+    </div>
+  );
 };
