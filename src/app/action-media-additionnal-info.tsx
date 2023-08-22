@@ -1,15 +1,12 @@
-import axios from "axios";
-
+"use server";
+import type { MediaAdditionnalInfo } from "@/types/movies";
 import * as cheerio from "cheerio";
-import { NextResponse } from "next/server";
 
-export const POST = async (request: Request) => {
-  const { mediaUrl }: { mediaUrl: string } = await request.json();
-
-  const response = await axios.get(`https://www.rottentomatoes.com${mediaUrl}`);
+export const fetchMediaAdditionalInfo: (props: { mediaUrl: string }) => Promise<MediaAdditionnalInfo> = async ({ mediaUrl }) => {
+  const response = await fetch(`https://www.rottentomatoes.com${mediaUrl}`).then((res) => res.text());
 
   // Load the HTML into cheerio
-  const $ = cheerio.load(response.data);
+  const $ = cheerio.load(response);
 
   // Extract the content of the element with the specified data-qa attribute
   const synopsis = $('[data-qa="movie-info-synopsis"]').text().trim();
@@ -24,13 +21,13 @@ export const POST = async (request: Request) => {
     if ($(element).find("span a").length) {
       value = $(element)
         .find("span a")
-        .map((i, el) => $(el).text().trim())
+        .map((_, el) => $(el).text().trim())
         .get()
         .join(", ");
     }
     movieInfo[label.toLowerCase()] = value.replace(/\s+/g, " ").trim();
   });
-  return NextResponse.json({
+  return {
     synopsis,
     criticsConsensus,
     audienceConsensus,
@@ -39,5 +36,5 @@ export const POST = async (request: Request) => {
     genres: movieInfo.genre,
     starring: movieInfo.starring,
     releaseDate: movieInfo["release date (theaters)"] ?? movieInfo["release date (streaming)"],
-  });
+  };
 };
