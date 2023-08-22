@@ -13,12 +13,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+} from "../components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
 import { ChevronDoubleRightIcon, FilmIcon, TvIcon, VideoCameraIcon, XCircleIcon } from "@heroicons/react/24/outline";
-import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 // import { Slider } from "./ui/slider";
 
 // this type is used to infer the type of the value in the handleFilterChange function
@@ -126,6 +126,15 @@ export const Filters: FC<{ initialFilters: FilterOptions; initialType: ResourceT
   };
 
   const resetFilters = () => {
+    setFilters({
+      genre: [],
+      criticsScore: [],
+      affiliate: [],
+      audienceScore: [],
+      sort: [],
+      rating: [],
+    });
+    setType("movies_at_home");
     router.push(pathname);
   };
 

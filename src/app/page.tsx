@@ -1,5 +1,5 @@
-import { LoadMoreMedia } from "@/components/load-more-media";
-import { Filters } from "@/components/filters";
+import { LoadMoreMedia } from "@/app/load-more-media";
+import { Filters } from "@/app/filters";
 import type {
   GenreOption,
   CriticsScoreOption,
@@ -35,8 +35,8 @@ export default function Home({ searchParams }: { searchParams: { [key: string]: 
           ))}
         >
           <MediaList filters={filters} type={resourceType} />
-          <LoadMoreMedia />
         </Suspense>
+        <LoadMoreMedia />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use server";
 import type { Media, MediaQueryParameters, MovieQuery } from "@/types/movies";
-import { MediaCard } from "./media-card";
-import type { ReactNode } from "react";
+import { MediaCard, MediaCardSkeleton } from "./media-card";
+import { Suspense, type ReactNode } from "react";
 
 export const fetchMediaList: (props: MediaQueryParameters) => Promise<MovieQuery & { mediaList: ReactNode[] }> = async ({
   filters,
@@ -24,8 +24,10 @@ export const fetchMediaList: (props: MediaQueryParameters) => Promise<MovieQuery
   return {
     ...response,
     nextPage,
-    mediaList: response.grid.list.map((media: Media, index: number) => (
-      <MediaCard media={media} key={index} criticsVsAudiencePreference={[1]} />
+    mediaList: response.grid.list.map((media: Media) => (
+      <Suspense fallback={<MediaCardSkeleton />} key={media.publicId}>
+        <MediaCard media={media} criticsVsAudiencePreference={[1]} />
+      </Suspense>
     )),
   };
 };
