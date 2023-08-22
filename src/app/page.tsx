@@ -30,7 +30,7 @@ export default async function Home({ searchParams }: { searchParams: { [key: str
 
   return (
     <div className="bg-background">
-      <Filters initialFilters={filters} type={resourceType} />
+      <Filters initialFilters={filters} initialType={resourceType} />
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 md:gap-x-6 md:gap-y-8 py-10 flex-wrap px-3 md:px-10 ">
         {mediaList}
         <LoadMoreMedia />

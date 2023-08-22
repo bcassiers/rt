@@ -19,7 +19,7 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { ChevronDoubleRightIcon, FilmIcon, TvIcon, VideoCameraIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
-import { Slider } from "./ui/slider";
+// import { Slider } from "./ui/slider";
 
 // this type is used to infer the type of the value in the handleFilterChange function
 export type FilterValueType<T extends keyof FilterOptions> = FilterOptions[T][number];
@@ -86,11 +86,12 @@ const TYPE_DISPLAY_PROPS: TypeDisplayProps[] = [
   },
 ];
 
-export const Filters: FC<{ initialFilters: FilterOptions; type: ResourceType }> = ({ initialFilters, type }) => {
+export const Filters: FC<{ initialFilters: FilterOptions; initialType: ResourceType }> = ({ initialFilters, initialType }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const [criticsVsAudiencePreference, setCriticsVsAudiencePreference] = useState([1]);
-
+  // const [criticsVsAudiencePreference, setCriticsVsAudiencePreference] = useState([1]);
+  const [filters, setFilters] = useState(initialFilters);
+  const [type, setType] = useState<ResourceType>(initialType);
   const setSearchParams = (newQuery: Record<string, string | string[]>) => {
     const params = new URLSearchParams();
 
@@ -109,24 +110,26 @@ export const Filters: FC<{ initialFilters: FilterOptions; type: ResourceType }> 
 
   const handleFilterChange = <T extends keyof FilterOptions>(filterType: T, value: FilterValueType<T>) => {
     let newQuery;
-    const currentFilter = initialFilters[filterType] as unknown[];
+    const currentFilter = filters[filterType] as unknown[];
     if (currentFilter.includes(value)) {
-      newQuery = { ...initialFilters, [filterType]: currentFilter.filter((item) => item !== value) };
+      newQuery = { ...filters, [filterType]: currentFilter.filter((item) => item !== value) };
     } else {
-      newQuery = { ...initialFilters, [filterType]: [...currentFilter, value] };
+      newQuery = { ...filters, [filterType]: [...currentFilter, value] };
     }
+    setFilters(newQuery);
     setSearchParams({ ...newQuery, type });
   };
 
   const handleTypeChange = (value: ResourceType) => {
-    setSearchParams({ ...initialFilters, type: value });
+    setType(value);
+    setSearchParams({ ...filters, type: value });
   };
 
   const resetFilters = () => {
     router.push(pathname);
   };
 
-  const areSomeFiltersActive = Object.values(initialFilters).some((filter) => filter.length > 0);
+  const areSomeFiltersActive = Object.values(filters).some((filter) => filter.length > 0);
 
   const TypeMenu = () => (
     <Tabs className="flex flex-col" value={type} onValueChange={(value) => handleTypeChange(value as ResourceType)}>
@@ -145,7 +148,19 @@ export const Filters: FC<{ initialFilters: FilterOptions; type: ResourceType }> 
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className={cn("capitalize", { "border-blue-300": !!initialFilters[type].length })}>
+          <Button
+            variant="outline"
+            className={cn(
+              "capitalize",
+              !!filters[type].length && {
+                "border-blue-300": type === "genre",
+                "border-yellow-300": type === "criticsScore",
+                "border-orange-300": type === "audienceScore",
+                "border-purple-300": type === "affiliate",
+                "border-indigo-300": type === "sort",
+              }
+            )}
+          >
             {name}
           </Button>
         </DropdownMenuTrigger>
@@ -154,7 +169,7 @@ export const Filters: FC<{ initialFilters: FilterOptions; type: ResourceType }> 
           <DropdownMenuSeparator />
           {toPairs<string>(filterOptions).map(([key, value]) => (
             <DropdownMenuCheckboxItem
-              checked={initialFilters[type].includes(key as never)}
+              checked={filters[type].includes(key as never)}
               onCheckedChange={() => handleFilterChange(type, key as FilterValueType<T>)}
               key={key}
             >
@@ -174,19 +189,19 @@ export const Filters: FC<{ initialFilters: FilterOptions; type: ResourceType }> 
     </div>
   );
 
-  const PreferenceSlider = () => (
-    <div className="ml-auto flex gap-3 w-[500px] items-center">
-      Preference :<p>Critics</p>
-      <Slider
-        max={2}
-        step={1}
-        value={criticsVsAudiencePreference}
-        onValueChange={setCriticsVsAudiencePreference}
-        className="max-w-54 w-54 flex-grow"
-      />
-      <p>Audience</p>
-    </div>
-  );
+  // const PreferenceSlider = () => (
+  //   <div className="ml-auto flex gap-3 w-[500px] items-center">
+  //     Preference :<p>Critics</p>
+  //     <Slider
+  //       max={2}
+  //       step={1}
+  //       value={criticsVsAudiencePreference}
+  //       onValueChange={setCriticsVsAudiencePreference}
+  //       className="max-w-54 w-54 flex-grow"
+  //     />
+  //     <p>Audience</p>
+  //   </div>
+  // );
 
   const ActiveFiltersList = () => (
     <>
@@ -194,7 +209,7 @@ export const Filters: FC<{ initialFilters: FilterOptions; type: ResourceType }> 
         <div className="text-sm flex gap-3 h-fit items-center flex-wrap">
           <p className="font-bold">Active filters :</p>
           {FILTER_DISPLAY_PROPS.map((filterDisplayProps) =>
-            initialFilters[filterDisplayProps.type].map((filter) => (
+            filters[filterDisplayProps.type].map((filter) => (
               <Badge
                 key={filter}
                 className={cn("cursor-pointer", {
@@ -221,10 +236,13 @@ export const Filters: FC<{ initialFilters: FilterOptions; type: ResourceType }> 
 
   return (
     <div className="flex flex-col gap-2 md:gap-6 sticky top-0 py-2 px-3 md:px-10 md:py-6 bg-background border-b border-foreground z-10">
-      <TypeMenu />
+      <div className="flex justify-between gap-2 md:gap-6 items-center">
+        <TypeMenu />
+        <div className={cn("h-3 w-3 rounded-full overflow-hidden border border-foreground")} />
+      </div>
       <div className="flex justify-between flex-wrap gap-2 md:gap-6">
         <FilterMenu />
-        <PreferenceSlider />
+        {/* <PreferenceSlider /> */}
       </div>
       <ActiveFiltersList />
     </div>
