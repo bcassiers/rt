@@ -5,7 +5,7 @@ import type { FilterOptions } from "@/types/rotten-tomatoes";
 import { toPairs } from "lodash";
 import { usePathname, useRouter } from "next/navigation";
 import type { FC } from "react";
-import { useState } from "react";
+// import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -86,12 +86,10 @@ const TYPE_DISPLAY_PROPS: TypeDisplayProps[] = [
   },
 ];
 
-export const Filters: FC<{ initialFilters: FilterOptions; initialType: ResourceType }> = ({ initialFilters, initialType }) => {
+export const Filters: FC<{ filters: FilterOptions; type: ResourceType }> = ({ filters, type }) => {
   const router = useRouter();
   const pathname = usePathname();
   // const [criticsVsAudiencePreference, setCriticsVsAudiencePreference] = useState([1]);
-  const [filters, setFilters] = useState(initialFilters);
-  const [type, setType] = useState<ResourceType>(initialType);
   const setSearchParams = (newQuery: Record<string, string | string[]>) => {
     const params = new URLSearchParams();
 
@@ -116,25 +114,14 @@ export const Filters: FC<{ initialFilters: FilterOptions; initialType: ResourceT
     } else {
       newQuery = { ...filters, [filterType]: [...currentFilter, value] };
     }
-    setFilters(newQuery);
     setSearchParams({ ...newQuery, type });
   };
 
   const handleTypeChange = (value: ResourceType) => {
-    setType(value);
     setSearchParams({ ...filters, type: value });
   };
 
   const resetFilters = () => {
-    setFilters({
-      genre: [],
-      criticsScore: [],
-      affiliate: [],
-      audienceScore: [],
-      sort: [],
-      rating: [],
-    });
-    setType("movies_at_home");
     router.push(pathname);
   };
 
